@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interfaz — Raven Docs</title>
+<meta name="description" content="Temas, materiales de cristal, blur, editor de código, docking, isla, herramientas de autor, accesibilidad, idiomas, RTL y páginas web en Raven.">
+<link rel="icon" type="image/png" href="assets/img/logo-white.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('raven-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
+</head>
+<body data-page="interfaz.html">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Abrir el menú">&equiv;</button>
+  <a class="brand" href="index.html"><img src="assets/img/logo-white.png" alt=""><span>Raven <b>Docs</b></span><span class="ver">v0.1.3</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="search-btn" id="search-open" aria-label="Buscar en la documentación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span class="label">Buscar...</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="icon-btn" id="theme-toggle" aria-label="Cambiar de tema">&#9788;</button>
+  <a class="ghbtn" href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener" aria-label="Raven en GitHub">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+    <span class="label">GitHub</span>
+  </a>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"><div id="sidebar-nav"></div></aside>
+  <main id="main">
+    <div class="content">
+
+      <div class="page-head">
+        <span class="eyebrow">Interfaz</span>
+        <h1>El aspecto, los materiales y las herramientas</h1>
+        <p>Raven no solo coloca widgets: define un sistema visual completo con temas, estilos y cristal, y trae las piezas que necesitan los editores y las herramientas de autor. Aquí tienes cómo se combinan y qué funciones las controlan.</p>
+      </div>
+
+      <div class="toc">
+        <h4>En esta página</h4>
+        <ol>
+          <li><a href="#temas">Temas y estilos</a></li>
+          <li><a href="#glass">Glass y blur</a></li>
+          <li><a href="#editor">Editor de texto</a></li>
+          <li><a href="#docking">Docking</a></li>
+          <li><a href="#isla">La isla</a></li>
+          <li><a href="#herramientas">Herramientas de autor</a></li>
+          <li><a href="#accesibilidad">Accesibilidad</a></li>
+          <li><a href="#idiomas">Idiomas y RTL</a></li>
+          <li><a href="#web">Páginas web</a></li>
+        </ol>
+      </div>
+
+      <h2 id="temas">Temas y estilos</h2>
+      <p>Un tema es lo que da aspecto a cada widget: unos <strong>cuarenta colores</strong> por rol (no por widget: <code>accent</code>, <code>panel</code>, <code>text</code>…), una veintena de <strong>métricas</strong> (tamaño de fuente, radio de esquina, altura de control…), un <strong>material</strong>, una <strong>fuente</strong>, los colores del <strong>código</strong> y una lista de <strong>estilos</strong> para un tipo de widget, una clase, o ambos.</p>
+      <p>Raven incluye cuatro temas: <code>Dark</code>, <code>Light</code>, <code>GlassDark</code> y <code>GlassLight</code>. El ejemplo <code>examples/themes</code> los recorre todos y permite editar sus archivos mientras se ejecuta.</p>
+
+      <figure class="shot">
+        <img src="assets/img/themes.png" alt="Ejemplo themes con tema ocean, una tarjeta paper, una tarjeta de cristal oscuro y Markdown">
+        <figcaption><b>examples/themes</b> &mdash; un tema para la aplicación, una tarjeta que conserva <code>paper.xml</code> y otra en cristal oscuro; a la derecha, Markdown en una etiqueta y en un editor.</figcaption>
+      </figure>
+
+      <h3>Cambiar un tema desde C</h3>
+      <p>Se puede partir de uno de los cuatro temas y retocar cualquier color o métrica. <code>Rtheme_set_accent</code> deriva de un solo color los tonos hover, pressed, el foco, la selección y los enlaces.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rtheme_apply(R_THEME_DARK);                                /* uno de los cuatro                        */
+Rtheme_set_accent(0.13f, 0.83f, 0.93f);                    /* el acento y todos sus tonos              */
+Rtheme_set_color(R_COLOR_PANEL, 0.07f, 0.10f, 0.17f, 1);   /* un color concreto                        */
+Rtheme_set_metric(R_METRIC_CORNER_RADIUS, 10);             /* una métrica concreta                     */
+Rtheme_set_material(R_MATERIAL_FROSTED_GLASS);             /* de qué están hechas las superficies      */
+Rtheme_set_dark(R_TRUE);                                   /* tema oscuro: tinte del cristal y código  */</code></pre>
+      </div>
+      <p>Para un widget y todo lo que contiene: <code>Rwidget_set_color</code>, <code>Rwidget_set_metric</code> y <code>Rwidget_set_material</code>. En XML equivalen a <code>Color.Accent="#F00"</code>, <code>Metric.CornerRadius="4"</code> y <code>Material="Glass"</code>.</p>
+
+      <h3>Estilos y clases</h3>
+      <p>Un estilo da valores a los widgets de un tipo, de una clase o de ambos. Un widget puede tener varias clases separadas por espacios: <code>Class="card danger"</code>.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rtheme_set_style_metric("Button", NULL, R_METRIC_CORNER_RADIUS, 16);            /* todos los botones          */
+Rtheme_set_style_color(NULL, "danger", R_COLOR_ACCENT, 0.98f, 0.44f, 0.52f, 1);  /* la clase "danger"          */
+Rtheme_set_style_color("Label", "eyebrow", R_COLOR_TEXT, 0.13f, 0.83f, 0.93f, 1);
+Rtheme_set_style_material(NULL, "card", R_MATERIAL_TINTED_GLASS);
+
+Rwidget_add_class(campo, "invalid");    /* el cambio de clase se ve al instante */
+Rwidget_remove_class(campo, "invalid");</code></pre>
+      </div>
+      <p>Cuando varios estilos dan el mismo valor, gana el que tiene tipo y clase sobre el de solo clase, y este sobre el de solo tipo. Entre iguales, gana el último definido. Lo que se pone directamente en el widget (<code>Rwidget_set_color</code>, <code>Color.*</code>) gana sobre cualquier estilo.</p>
+      <div class="callout">
+        <div class="ci">&#9670;</div>
+        <p>Los colores y métricas puestos con <code>Rwidget_set_color</code> se heredan por lo que contiene el widget. Un estilo se aplica solo a los widgets que nombra, no a sus hijos; la excepción es el color del texto, que cada widget toma del ancestro más cercano que lo tenga.</p>
+      </div>
+
+      <h3>Archivos de tema</h3>
+      <p>Un tema también se escribe en XML. Se carga sin aplicarlo y luego se usa por su nombre. Los errores se informan con su línea y el resto del archivo se sigue usando.</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Theme Name="Ocean" Base="Dark" Accent="#22D3EE" CornerRadius="10"&gt;
+    &lt;Colors Window="#0B1220" Panel="#111A2C" Text="#DCE7F5" Separator="#FFFFFF1A"/&gt;
+    &lt;Metrics ControlHeight="32" Spacing="8"/&gt;
+    &lt;Glass Frost="0.8" Refraction="1.2" Saturation="1.1" Rim="1" Shadow="1"/&gt;
+    &lt;Syntax Keyword="#7DD3FC" String="#86EFAC" Comment="#64748B" Heading="#22D3EE"/&gt;
+
+    &lt;Style Widget="Button" CornerRadius="16"/&gt;
+    &lt;Style Class="danger" Accent="#FB7185" AccentHovered="#FDA4AF" AccentPressed="#E11D48"/&gt;
+    &lt;Style Class="card" Panel="#1B2742" CornerRadius="18" Material="Solid"/&gt;
+    &lt;Style Widget="Label" Class="eyebrow" Text="#22D3EE" FontSize="12"/&gt;
+&lt;/Theme&gt;</code></pre>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">const char* name = Rtheme_load("themes/ocean.xml");   /* "Ocean": se guarda, no se aplica */
+Rtheme_use("Ocean");                                   /* pasa a ser el tema de la aplicación */
+Rtheme_save("mi-tema.xml", "Mine");                    /* guarda el tema en uso con los cambios */</code></pre>
+      </div>
+      <p><code>Rtheme_get_count</code> y <code>Rtheme_get_name_at</code> listan todos los temas, incluidos los cuatro incorporados.</p>
+
+      <h3>Atributos de <code>&lt;Theme&gt;</code></h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Atributo</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>Name</code></td><td>Nombre con el que se guarda (por defecto, el del archivo).</td></tr>
+            <tr><td><code>Base</code></td><td>Tema del que parte: <code>Dark</code>, <code>Light</code>, <code>GlassDark</code>, <code>GlassLight</code> o uno cargado antes.</td></tr>
+            <tr><td><code>Accent</code></td><td>Color de acento y los tonos que se derivan de él.</td></tr>
+            <tr><td><code>Material</code></td><td><code>Solid</code>, <code>Glass</code>, <code>FrostedGlass</code> o <code>TintedGlass</code>.</td></tr>
+            <tr><td><code>Dark</code></td><td><code>true</code> / <code>false</code>, si el tema base no lo indica bien.</td></tr>
+            <tr><td><code>Font</code></td><td>Archivo de fuente, relativo al archivo del tema.</td></tr>
+            <tr><td><code>Wallpaper</code></td><td>Lo que hay detrás del contenido: una imagen, <code>Dark</code>, <code>Light</code>, colores para mezclar (<code>"#1E3A8A,#7C3AED,#0F766E"</code>) o <code>None</code>.</td></tr>
+            <tr><td>cualquier color o métrica</td><td><code>Panel="#111A2C"</code>, <code>CornerRadius="10"</code>: igual que dentro de <code>&lt;Colors&gt;</code> y <code>&lt;Metrics&gt;</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Bloques del archivo</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Elemento</th><th>Contenido</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;Colors&gt;</code></td><td><code>Window Panel Border Text TextDisabled TextPlaceholder Accent AccentHovered AccentPressed AccentText Control ControlHovered ControlPressed ControlBorder Input Focus Selection RowHovered Track Handle HandleHovered Separator Header HeaderHovered TabActive Popup PopupBorder Shadow Tooltip TooltipText Switch Success Warning Danger Link Code</code></td></tr>
+            <tr><td><code>&lt;Metrics&gt;</code></td><td><code>FontSize CornerRadius BorderWidth ControlHeight PaddingX PaddingY Spacing ScrollbarSize RowHeight Indent SplitterSize CheckSize SliderHandleSize PopupRadius BlurRadius</code></td></tr>
+            <tr><td><code>&lt;Glass&gt;</code></td><td><code>Frost Refraction Saturation Rim Shadow</code>: multiplicadores de lo que hace el cristal del tema (1 = como se diseñó, 0 = nada).</td></tr>
+            <tr><td><code>&lt;Syntax&gt;</code></td><td><code>Comment String Number Keyword Type Function Tag Attribute Punctuation Directive Heading Strong Emphasis Link</code></td></tr>
+            <tr><td><code>&lt;Style&gt;</code></td><td>Colores, métricas y <code>Material</code> para los widgets de un tipo (<code>Widget</code>) y/o una clase (<code>Class</code>).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Un tema para una parte de la ventana</h3>
+      <p><code>Theme</code> en un widget hace que ese widget y todo lo que contiene usen otro tema, aunque cambie el de la aplicación. Los menús y popups que se abren desde ahí también lo llevan.</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Border Theme="Paper" Padding="18"&gt; ... &lt;/Border&gt;        &lt;!-- un tema por nombre          --&gt;
+&lt;Border Theme="themes/paper.xml"&gt; ... &lt;/Border&gt;          &lt;!-- o directamente desde archivo --&gt;
+&lt;Window Theme="Ocean" ...&gt;</code></pre>
+      </div>
+      <p>Desde C se hace con <code>Rwidget_set_theme(widget, "Paper")</code>. La isla de una ventana usa esta capacidad: siempre es oscura salvo que se le diga <code>Theme="Default"</code>.</p>
+
+      <h3>Recarga en vivo</h3>
+      <p>Los archivos de tema, como los de interfaz, se vigilan mientras la aplicación corre: guarda el archivo y cada widget que usa ese tema sigue el cambio. <code>Rxml_set_live_reload(R_FALSE)</code> (o <code>RAVEN_LIVE_RELOAD=0</code>) lo desactiva para una aplicación distribuida; <code>Rxml_set_reload_callback</code> avisa cuando un archivo se cargó de nuevo, y <code>Rxml_check_files()</code> comprueba en ese momento en lugar de esperar al siguiente tick (cinco veces por segundo). Un archivo con errores no cambia nada.</p>
+
+      <h2 id="glass">Glass y blur</h2>
+      <p>Un material es de lo que está hecha la superficie de un widget. Los temas de cristal son solo un punto de partida: cualquier widget puede pedir su propio material.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Material</th><th>Qué se ve</th></tr></thead>
+          <tbody>
+            <tr><td><code>Solid</code></td><td>Relleno con los colores del tema.</td></tr>
+            <tr><td><code>Glass</code></td><td>Cristal claro: lo que hay detrás se ve, doblado en el borde.</td></tr>
+            <tr><td><code>FrostedGlass</code></td><td>Desenfocado: los colores de detrás, sin sus formas.</td></tr>
+            <tr><td><code>TintedGlass</code></td><td>Desenfocado y teñido por el tema: el más fácil de leer.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rtheme_apply(R_THEME_GLASS_DARK);                 /* un tema viene con su material              */
+Rtheme_set_material(R_MATERIAL_FROSTED_GLASS);    /* todos los que no tengan uno propio          */
+Rwidget_set_material(panel, R_MATERIAL_GLASS);    /* este widget y lo que contiene               */</code></pre>
+      </div>
+      <p>En XML: <code>Material="TintedGlass"</code> en cualquier widget. Sea cual sea el material, un popup es más opaco que el panel del que sale, y un panel más que la barra que tiene encima, para que lo de arriba se lea siempre.</p>
+      <p>Con cristal, los controles son cápsulas que muestran una versión desenfocada y más viva de lo que hay detrás; su borde lo dobla como una lente y recoge una luz colocada arriba a la izquierda. El pomo de un slider se convierte en una lente clara mientras se arrastra.</p>
+
+      <div class="callout warn">
+        <div class="ci">&#9888;</div>
+        <p>El cristal necesita algo detrás. Los temas de cristal ponen cada ventana sobre un gris oscuro liso (oscuro) o blanco liso (claro). <code>Rwindow_set_background</code> pone una imagen detrás, y un tema puede dar manchas de color con <code>Wallpaper="#101020, #3040C0, #C02080"</code>. Un widget personalizado dibuja cristal con <code>Rdraw_glass</code>.</p>
+      </div>
+
+      <h3>Cómo se renderiza</h3>
+      <p>Un frame que contiene cristal se dibuja en una imagen fuera de pantalla; donde empieza el cristal, lo ya dibujado se copia y se desenfoca, y las primitivas de cristal muestrean tanto la copia nítida como la desenfocada. El cristal sobre cristal funciona. Un frame sin cristal se dibuja directamente en la ventana: los temas sólidos no cuestan nada extra.</p>
+
+      <h3>Blur y ventanas que se ven a través</h3>
+      <p><code>BackgroundBlur</code> es un panel que muestra lo que hay detrás desenfocado, sin el doblado ni el borde del cristal. Tiene cuatro estilos:</p>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Estilo</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>Plain</code></td><td>Solo desenfocado.</td></tr>
+            <tr><td><code>Frosted</code></td><td>Desenfocado, un poco velado y con grano fino (por defecto).</td></tr>
+            <tr><td><code>Glass</code></td><td>Desenfocado y doblado en el borde, como el material de cristal.</td></tr>
+            <tr><td><code>Native</code></td><td>Abre la ventana: el <em>sistema</em> desenfoca el escritorio que hay detrás.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window Transparent="true" Backdrop="Blur" Borderless="true"&gt;
+    &lt;BackgroundBlur Style="Native" CornerRadius="24" Padding="22" Tint="#10141C99"&gt;
+        &lt;VBox Spacing="12"&gt;
+            &lt;Label Text="Panel flotante"/&gt;
+            &lt;Button Text="Cerrar" OnClicked="window.close"/&gt;
+        &lt;/VBox&gt;
+    &lt;/BackgroundBlur&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+      <p>Una ventana creada con <code>Transparent="true"</code> (<code>R_WINDOW_TRANSPARENT</code>) no se rellena: donde no dibuja ningún widget se ve lo que hay detrás en la pantalla. <code>Backdrop</code> (<code>Rwindow_set_backdrop</code>) pide al sistema lo que pone ahí: nada, un blur, o los materiales acrylic y mica de Windows 11. <code>Rwindow_set_opacity</code> atenúa la ventana entera.</p>
+      <p>Todo depende del sistema de ventanas: Windows 10 y 11; X11 con compositor y KWin para el blur. <code>Rwindow_get_backdrop</code> dice qué se consiguió, y donde no hay nada disponible la misma interfaz se ve sobre un fondo liso.</p>
+      <figure class="shot">
+        <img src="assets/img/overlay.png" alt="Ejemplo overlay con panel translúcido y blur nativo sobre un damero">
+        <figcaption><b>examples/overlay</b> &mdash; el panel es translúcido, sus esquinas están vacías y el panel <code>Native</code> es un agujero a través del damero.</figcaption>
+      </figure>
+
+      <h2 id="editor">Editor de texto</h2>
+      <p><code>R_WIDGET_TEXT_EDITOR</code> (<code>&lt;TextEditor&gt;</code>) edita texto de cualquier número de líneas: selección, portapapeles, deshacer, números de línea y ajuste de línea. Con un lenguaje colorea el texto, propone palabras mientras se escribe (las del lenguaje y las que ya están en el texto; <code>Ctrl+Space</code> las pide), muestra qué corchete cierra a cuál, cierra corchetes y comillas, indenta y comenta líneas (<code>Ctrl+/</code>).</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rtext_editor_set_language(editor, Rlanguage_for_file(ruta));   /* "main.rs" -> "Rust" */
+
+Rtext_editor_set_completion_callback(editor, mis_propuestas, user);
+Rtext_editor_add_marker(editor, inicio, fin, "error: falta un ;", R_MARKER_ERROR);</code></pre>
+      </div>
+      <p>Los lenguajes incorporados son C, C++, C#, Java, JavaScript, TypeScript, Python, Rust, GLSL, JSON, CSS, XML y HTML (con el JavaScript y el CSS que contiene). Cualquiera se puede cambiar y se pueden declarar otros con <code>Rlanguage_register</code>: un lenguaje es una descripción (sus palabras, sus comentarios, sus comillas), no código.</p>
+      <div class="callout tip">
+        <div class="ci">&#128161;</div>
+        <p>El editor sabe lo que puede deducir del texto: <strong>no es un language server</strong>. Lo que necesita entender un programa entero viene de fuera por dos puertas: <code>Rtext_editor_set_completion_callback</code> (tus propuestas, listadas primero) y <code>Rtext_editor_add_marker</code> (subrayar un fragmento con un mensaje: los errores de un compilador). Un cliente LSP se conectaría ahí; Raven no incluye uno.</p>
+      </div>
+
+      <h3>Markdown</h3>
+      <p>Una etiqueta con <code>Markdown="true"</code> dibuja el texto formateado: títulos, listas, citas, bloques de código, tablas y enlaces que abren o disparan acciones. En el editor, el texto sigue tal como se escribió y se estiliza donde está.</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Label Markdown="true" Wrap="true"&gt;
+    ## Notas
+    Texto **fuerte** y *enfatizado*, `código`, un [enlace](https://example.org),
+
+    - una lista
+    - [x] con una casilla
+&lt;/Label&gt;
+
+&lt;TextEditor Markdown="true"/&gt;</code></pre>
+      </div>
+      <p><code>Rlabel_set_markdown</code>, <code>Rlabel_set_link_callback</code> y <code>Rlabel_get_plain_text</code> completan el lado de C. En el editor, el resaltado de Markdown viene de fábrica.</p>
+
+      <h3>Personalizar la apariencia del código</h3>
+      <p>Los colores de sintaxis salen del bloque <code>&lt;Syntax&gt;</code> del tema (<code>Comment</code>, <code>String</code>, <code>Number</code>, <code>Keyword</code>, <code>Type</code>, <code>Function</code>, <code>Tag</code>, <code>Attribute</code>, <code>Punctuation</code>, <code>Directive</code>, <code>Heading</code>, <code>Strong</code>, <code>Emphasis</code> y <code>Link</code>). Cambiar el tema cambia el editor entero sin tocar el documento.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rtheme_set_color(R_COLOR_CODE, 0.05f, 0.07f, 0.11f, 1.0f);   /* fondo del código */
+Rtheme_apply(R_THEME_GLASS_DARK);                            /* también cambia la sintaxis */</code></pre>
+      </div>
+
+      <h2 id="docking">Docking</h2>
+      <p>Un <code>DockArea</code> ordena sus hijos como paneles con pestañas. El usuario arrastra una pestaña a otra barra de pestañas, a un lado de un panel o a un borde del área; los paneles vuelan a su nueva posición.</p>
+      <ul>
+        <li><code>Slot.Dock</code>, <code>Slot.DockTo</code> y <code>Slot.DockSize</code> dan la disposición inicial en XML.</li>
+        <li><code>Rdock_area_add_panel</code> añade paneles desde C.</li>
+        <li><code>Rdock_area_save_layout</code> y <code>Rdock_area_load_layout</code> convierten la disposición en un texto corto y la restauran.</li>
+      </ul>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;DockArea Name="docks" Slot.Fill="1"&gt;
+    &lt;Border Slot.Dock="Left" Slot.DockSize="260"&gt;
+        &lt;FileBrowser/&gt;
+    &lt;/Border&gt;
+    &lt;TabView Slot.Dock="Center"&gt;
+        &lt;Tab Title="Editor"&gt;&lt;TextEditor Name="editor"/&gt;&lt;/Tab&gt;
+        &lt;Tab Title="Consola"&gt;&lt;Label&gt;Listo.&lt;/Label&gt;&lt;/Tab&gt;
+    &lt;/TabView&gt;
+&lt;/DockArea&gt;</code></pre>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid docks = Rwidget_find(window, "docks");
+Rid panel = Rdock_area_add_panel(docks, editor, "Editor");
+Rdock_area_set_panel_closable(docks, panel, R_TRUE);
+
+const char* layout = Rdock_area_save_layout(docks);   /* texto corto, válido hasta la próxima llamada */
+Rdock_area_load_layout(docks, layout);</code></pre>
+      </div>
+
+      <h3>Desprender pestañas</h3>
+      <p>Una pestaña arrastrada fuera del área se lleva su panel a una ventana propia; arrastrada de vuelta sobre un dock, vuelve a acoplarse. Un doble clic en la pestaña, o cerrar la ventana, devuelve el panel a donde estaba. <code>Rdock_area_set_tearable</code> (o <code>Tearable="false"</code>) mantiene los paneles dentro de su ventana.</p>
+      <figure class="shot">
+        <img src="assets/img/workspace.png" alt="Ejemplo workspace con paneles acoplados, explorador de archivos y una isla">
+        <figcaption><b>examples/workspace</b> &mdash; paneles acoplados, explorador de archivos, isla y cristal oscuro.</figcaption>
+      </figure>
+
+      <h2 id="isla">La isla</h2>
+      <p>Una píldora en la parte superior de la ventana que se despliega bajo el puntero, con un clic, o desde C. Sus dos contenidos se funden mientras cambia de tamaño; un clic la fija abierta y un clic fuera la cierra. Es oscura sea cual sea el tema, como la muesca de un teléfono (<code>Theme="Default"</code> le da el tema de la ventana). Es opcional, y una <code>Island</code> también se puede usar como widget normal en cualquier sitio.</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window ...&gt;
+    &lt;Island&gt;
+        &lt;Label Text="3 mensajes"/&gt;                      &lt;!-- plegada  --&gt;
+        &lt;VBox&gt; ... cualquier cosa ... &lt;/VBox&gt;           &lt;!-- desplegada --&gt;
+    &lt;/Island&gt;
+    &lt;VBox&gt; ... el contenido de la ventana ... &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Risland_set_expanded(isla, R_TRUE);       /* queda abierta  */
+Risland_expand_for(isla, 2.0);            /* se abre 2 s para decir algo y se pliega */</code></pre>
+      </div>
+
+      <h2 id="herramientas">Herramientas de autor</h2>
+      <p>El header <code>raven_tools.h</code> agrupa los widgets de las herramientas creativas. Cada uno mantiene un modelo pequeño que la aplicación rellena y lee, o que escribe en XML.</p>
+
+      <h3>Selector de color</h3>
+      <p>Cuadrado de saturación y valor, franja de tonos, opacidad, código, números y muestras. <code>Rcolor_picker_set_popup</code> lo convierte en una muestra que abre el selector en un popup.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid picker = Rcolor_picker_create();
+Rcolor_picker_set_changed_callback(picker, on_color, NULL);
+Rcolor_picker_set_popup(picker, R_TRUE);
+Rcolor_picker_set_color(picker, 0.13f, 0.83f, 0.93f, 1.0f);</code></pre>
+      </div>
+
+      <h3>Línea de tiempo</h3>
+      <p>Ajusta a frames, al playhead y a los otros elementos; mueve varios a la vez, estira clips por sus extremos, selecciona con un rectángulo, hace zoom con <code>Ctrl</code> + rueda y reproduce.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid timeline = Rtimeline_create();
+int track = Rtimeline_add_track(timeline, "Camera");
+int clip  = Rtimeline_add_clip(timeline, track, 0.0, 3.5, "Plano general");
+Rtimeline_add_key(timeline, track, 6.0);
+Rtimeline_set_time_callback(timeline, on_time, NULL);       /* al arrastrar o reproducir */
+Rtimeline_set_changed_callback(timeline, on_item, NULL);    /* al mover o estirar        */</code></pre>
+      </div>
+
+      <h3>Grafo de nodos</h3>
+      <p>Se desplaza con el botón central o <code>Alt</code> + arrastrar, y hace zoom alrededor del puntero. Los pines tienen tipo y color por tipo, y solo se conectan a los que encajan. Un cable se estira desde un pin, se siente atraído por los pines compatibles y se puede soltar sobre un nodo; tomado por su extremo, se conecta en otro sitio o se suelta. Los cables cuelgan y se balancean cuando sus nodos se mueven.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid graph = Rnode_graph_create();
+int noise = Rnode_graph_add_node(graph, "Noise", 40, 60);
+int out   = Rnode_graph_add_output(graph, noise, "Value", "number");
+int blend = Rnode_graph_add_node(graph, "Blend", 320, 90);
+int in    = Rnode_graph_add_input(graph, blend, "A", "number");
+
+Rnode_graph_connect(graph, out, in);
+Rnode_graph_set_node_content(graph, noise, Rwidget_create(R_WIDGET_SLIDER));  /* cualquier widget */
+Rnode_graph_set_connect_callback(graph, may_link, NULL);                      /* rechaza bucles    */
+Rnode_graph_set_flow_visible(graph, R_TRUE);                                  /* pulsos por los cables */</code></pre>
+      </div>
+
+      <h3>Editor de bloques</h3>
+      <p>Bloques con forma, categorías y colores, ranuras para valores y cuerpos anidables. Ideal para lenguajes visuales, reglas o programación por bloques. <code>Rblock_editor_save</code> devuelve todos los scripts como texto y <code>Rblock_editor_load</code> los reconstruye.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid blocks = Rblock_editor_create();
+Rblock_editor_add_kind(blocks, "print", "Escribir", R_BLOCK_SHAPE_STACK, "Salida");
+int script = Rblock_editor_add_block(blocks, "print", 40, 40);
+Rblock_editor_set_value(blocks, script, 0, "\"Hola\"");
+
+const char* saved = Rblock_editor_save(blocks);
+Rblock_editor_load(blocks, saved);</code></pre>
+      </div>
+
+      <h3>Efectos y shaders</h3>
+      <p><code>raven_shader.h</code> añade efectos de fragmento en SPIR-V y ocho efectos incorporados: <code>aurora</code>, <code>shimmer</code>, <code>neon</code>, <code>ripple</code>, <code>plasma</code>, <code>grain</code>, <code>spotlight</code> y <code>mesh</code>. Un <code>Border</code> puede usar un efecto como fondo, o un widget personalizado lo dibuja con <code>Rdraw_shader</code>.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid shader = Reffect_find("aurora");
+RShaderLook look;
+Rshader_look_defaults(shader, &amp;look);
+Rborder_set_effect(mi_border, shader, &amp;look);</code></pre>
+      </div>
+
+      <figure class="shot">
+        <img src="assets/img/studio.png" alt="Ejemplo studio con grafo de nodos, selector de color y línea de tiempo">
+        <figcaption><b>examples/studio</b> &mdash; grafo de nodos con widgets dentro, línea de tiempo que reproduce y selector de color que colorea los nodos seleccionados.</figcaption>
+      </figure>
+
+      <h3>Widgets personalizados</h3>
+      <p>Un widget <code>R_WIDGET_CUSTOM</code> se mide y se pinta con dos callbacks que usan las funciones <code>Rdraw_...</code> de <code>raven_draw.h</code>, y recibe sus eventos por <code>Rwidget_set_event_callback</code>. <code>Rxml_register_tag</code> le da un tag propio en XML con sus atributos, y <code>Rwidget_set_destroy_callback</code> avisa cuando desaparece para liberar lo que le pertenecía.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void on_paint(Rid widget, RPainter* p, const RRect* rect, void* user) {
+    float t = Rdraw_spring(p, &amp;estado-&gt;escala, hovered ? 1.0f : 0.0f, R_MOTION_BOUNCY);
+    Rdraw_rect(p, rect-&gt;x, rect-&gt;y, rect-&gt;w, rect-&gt;h, 12.0f * t, 0.13f, 0.83f, 0.93f, 1);
+}
+
+Rid custom = Rwidget_create(R_WIDGET_CUSTOM);
+Rcustom_set_measure_callback(custom, on_measure, estado);
+Rcustom_set_paint_callback(custom, on_paint, estado);
+Rxml_register_tag("MiWidget", crear_mi_widget, poner_atributo, estado);</code></pre>
+      </div>
+
+      <h2 id="accesibilidad">Accesibilidad</h2>
+      <p>Cada widget es visto por el lector de pantalla del sistema con su rol, nombre, valor y estado, y se puede usar desde él: pulsar, alternar, poner un valor, editar texto y mover el foco. Funciona con UI Automation en Windows (Narrator, NVDA, JAWS), NSAccessibility en macOS (VoiceOver) y AT-SPI en Linux (Orca). No hay que añadir nada: los nombres salen de los textos y de la etiqueta que hay delante de un campo.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Raccessibility_follow_system();                  /* tamaño, contraste y movimiento del sistema */
+Raccessibility_set_text_scale(1.5f);             /* todo el texto y los controles un 50 % más   */
+Raccessibility_set_high_contrast(R_TRUE);        /* temas High Contrast Dark / Light            */
+Raccessibility_set_color_filter(R_COLOR_FILTER_DEUTERANOPIA);
+Rwidget_set_accessible_name(boton_cerrar, "Cerrar");
+Raccessibility_announce("Archivo guardado", R_FALSE);</code></pre>
+      </div>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Button Icon="close.png" AccessibleName="Cerrar" AccessibleDescription="Cierra el documento"/&gt;</code></pre>
+      </div>
+      <p>Los filtros de color corrigen (o, para diseñadores, simulan) protanopia, deuteranopia, tritanopia y acromatopsia. <code>Raccessibility_set_reduce_motion</code> detiene las animaciones; <code>Raccessibility_set_focus_always_visible</code> muestra siempre el anillo de foco y más grueso.</p>
+
+      <h2 id="idiomas">Idiomas y RTL</h2>
+      <p>Las traducciones son tablas CSV: una columna por idioma, cualquier número de tablas, plurales con las reglas CLDR y recarga en vivo al guardar. Un texto que empieza por <code>@</code> es una clave: el widget sigue el idioma cuando cambia.</p>
+      <div class="code" data-lang="csv">
+<pre><code class="language-csv">key,en,fr,ar
+menu.file,File,Fichier,ملف
+greeting,"Hello, {0}!","Bonjour, {0} !",مرحبا {0}
+files.one,{n} file,{n} fichier,ملف واحد
+files.other,{n} files,{n} fichiers,{n} ملفات</code></pre>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rlocale_load_csv("strings.csv");
+Rlocale_set_language(Rlocale_get_system_language());
+
+Rlabel_set_text(label, Rtr("menu.file"));
+const char* args[] = { "Ada" };
+Rlabel_set_text(hello, Rtr_format("greeting", args, 1));
+Rlabel_set_text(count, Rtr_plural("files", 3));           /* "3 fichiers"              */
+Rlabel_set_text(size, Rlocale_format_number(1234.5, 1));  /* "1 234,5"                 */</code></pre>
+      </div>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Strings Source="strings.csv"/&gt;
+&lt;Button Text="@menu.file" Tooltip="@menu.file.tip"/&gt;</code></pre>
+      </div>
+
+      <h3>De derecha a izquierda</h3>
+      <p>Un idioma escrito de derecha a izquierda (árabe, hebreo, persa, urdu…) refleja los layouts: cajas, grids, menús, barras de desplazamiento y alineaciones empiezan por la derecha. <code>Rset_layout_direction(R_DIRECTION_RTL)</code> lo fuerza para todas las ventanas; <code>Rwidget_set_direction</code> o <code>Direction="RightToLeft"</code> para una parte.</p>
+      <p>El texto con ambas direcciones se ordena con el algoritmo bidireccional de Unicode y las letras árabes toman sus formas unidas. Un carácter que la fuente incluida no tiene se dibuja con una fuente del sistema (Segoe UI, Noto, las fuentes CJK…), y los emoji a color se dibujan en color.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">if (Rlocale_is_rtl()) {
+    Rset_layout_direction(R_DIRECTION_RTL);
+}
+
+Rwidget_set_direction(panel, R_DIRECTION_RTL);
+Rlocale_set_fallback_language("en");</code></pre>
+      </div>
+
+      <h2 id="web">Páginas web</h2>
+      <p><code>raven_web</code> es una librería opcional aparte que muestra páginas HTML, CSS y JavaScript dentro de una interfaz Raven. Raven no depende de ella; una aplicación que la quiere la enlaza junto a Raven (<code>raven::web</code>, opción <code>RAVEN_BUILD_WEB</code>).</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">#include &lt;raven_web.h&gt;
+
+Rweb_register_xml();                              /* una vez tras Rinit: &lt;WebView&gt; es un tag */
+Rid view = Rweb_view_create();                    /* o desde código                          */
+Rweb_view_load_url(view, "https://example.org");</code></pre>
+      </div>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;WebView Name="docs" Url="https://example.org" Slot.Fill="1" OnChanged="docs.navigated"/&gt;
+&lt;WebView Source="pages/help.html"/&gt;
+&lt;WebView&gt;&lt;![CDATA[&lt;h1&gt;Hola&lt;/h1&gt;&lt;p&gt;Desde &lt;b&gt;HTML&lt;/b&gt;.&lt;/p&gt;]]&gt;&lt;/WebView&gt;</code></pre>
+      </div>
+
+      <h3>Cómo funciona</h3>
+      <p><code>raven_web</code> no contiene un navegador. Arranca uno que <strong>ya está instalado</strong> (cualquiera de la familia Chromium: Microsoft Edge, que viene con Windows 10 y 11, Google Chrome, Chromium, Brave, Vivaldi), oculto y en su propio proceso, y habla con él por una tubería con el protocolo DevTools:</p>
+      <ul>
+        <li>el navegador manda una imagen de la página cada vez que cambia; la vista la muestra en una textura, como cualquier imagen de la interfaz (se puede recortar, desplazar, animar, poner bajo cristal o dentro de un nodo de un grafo);</li>
+        <li>la vista envía el ratón, las teclas y el texto que recibe;</li>
+        <li>los scripts se ejecutan en la página y la página manda mensajes de vuelta.</li>
+      </ul>
+
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Aspecto</th><th>Consecuencia</th></tr></thead>
+          <tbody>
+            <tr><td>El motor</td><td>El real, actualizado, sin nada que compilar ni distribuir: la librería son unas 3 000 líneas de C, 70 KB compilada.</td></tr>
+            <tr><td>Hace falta un navegador</td><td><code>Rweb_is_available()</code> lo dice. Sin uno, la vista muestra un mensaje y todo sigue siendo seguro de llamar.</td></tr>
+            <tr><td>Las páginas son imágenes</td><td>Llegan un frame o dos después de lo que muestran; van bien para documentos y herramientas, no para un juego. <code>Rweb_view_set_frames(view, R_WEB_FRAMES_JPEG, 80)</code> las aligera para páginas que se mueven mucho (PNG, por defecto, mantiene el texto nítido).</td></tr>
+            <tr><td>Un navegador para todas las vistas</td><td>Arranca con la primera vista (una fracción de segundo) y se para al borrar la última.</td></tr>
+            <tr><td>Perfil propio</td><td>Carpeta temporal, borrada al parar el navegador: sin cookies ni historial del usuario. <code>Rweb_set_profile_folder</code> da uno permanente.</td></tr>
+            <tr><td>Limitaciones</td><td>El cursor no cambia sobre enlaces; selectores de archivo, descargas, impresión, cámaras… necesitan una ventana del navegador. <code>alert</code>, <code>confirm</code> y <code>prompt</code> se aceptan al instante para que la página siga; un enlace que pide ventana nueva se abre en la vista.</td></tr>
+            <tr><td>Portapapeles</td><td><code>Ctrl+C</code>, <code>Ctrl+X</code> y <code>Ctrl+V</code> llevan texto entre la página y el portapapeles del sistema.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>El navegador se arranca con opciones que le impiden hablar con nada que no sean los sitios que muestra la aplicación: sin actualizaciones, sin informes, sin cuenta, sin servicios de mensajería y sin listas de navegación segura. Raven debe compilarse con su decodificador de imágenes (<code>RAVEN_WITH_STB_IMAGE</code>, activado por defecto): las imágenes de las páginas son PNG o JPEG.</p>
+
+      <h3>Encontrar el navegador</h3>
+      <p>En este orden: <code>Rweb_set_browser_path(path)</code>; la variable de entorno <code>RAVEN_WEB_BROWSER</code>; después los sitios habituales (<code>Program Files</code> y los datos locales de la aplicación en Windows, empezando por Edge; el <code>PATH</code> en Linux: <code>chromium</code>, <code>chromium-browser</code>, <code>google-chrome</code>, <code>microsoft-edge</code>, <code>brave-browser</code>…; <code>/Applications</code> en macOS). <code>Rweb_get_browser_path()</code> dice cuál se encontró.</p>
+      <p><code>Rweb_set_browser_arguments("--proxy-server=localhost:8080")</code> añade opciones a su línea de comandos (<code>RAVEN_WEB_ARGUMENTS</code> hace lo mismo). En Unix, a un navegador lanzado por el usuario <code>root</code> se le pasa <code>--no-sandbox</code>, porque si no se niega a arrancar; <code>RAVEN_WEB_NO_SANDBOX</code> lo hace para cualquiera (contenedores).</p>
+
+      <h3>La vista</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Función</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>Rweb_view_load_url</code>, <code>_load_file</code>, <code>_load_html</code></td><td>Qué muestra. El HTML dado como texto se escribe en una página vacía; sus scripts se ejecutan.</td></tr>
+            <tr><td><code>Rweb_view_reload</code>, <code>_stop</code>, <code>_go_back</code>, <code>_go_forward</code>, <code>_can_go_back</code>, <code>_can_go_forward</code></td><td>El historial.</td></tr>
+            <tr><td><code>Rweb_view_get_url</code>, <code>_get_title</code>, <code>_is_loading</code>, <code>_is_ready</code>, <code>_get_error</code></td><td>Su estado.</td></tr>
+            <tr><td><code>Rweb_view_set_zoom</code></td><td>El tamaño del contenido.</td></tr>
+            <tr><td><code>Rweb_view_get_texture</code></td><td>La imagen de la página, para dibujarla también en otro sitio.</td></tr>
+            <tr><td><code>Rweb_view_set_event_callback</code></td><td><code>R_WEB_EVENT_NAVIGATED</code>, <code>_TITLE</code>, <code>_LOADING</code>, <code>_LOADED</code>, <code>_FAILED</code>. La acción del widget (<code>OnChanged</code>) se dispara cuando cambia la dirección.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Es un widget como los demás: tamaño, slot, visibilidad, foco, tooltip… En XML acepta <code>Url</code>, <code>Source</code> (archivo relativo al documento), <code>Html</code> o el texto del elemento, <code>Zoom</code> y <code>Frames</code>/<code>Quality</code> (<code>Png</code> o <code>Jpeg</code>, 1..100).</p>
+
+      <h3>JavaScript en ambos sentidos</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void on_result(Rid view, const char* result, const char* error, void* user) {
+    /* result es JSON: "42", "\"texto\"", "{\"a\":1}", "null"; NULL si el script falló (ver error) */
+}
+
+Rweb_view_run_javascript(view, "document.title", on_result, NULL);
+Rweb_view_run_javascript(view, "fetch('/api').then(r =&gt; r.json())", on_result, NULL);  /* las promesas se esperan */
+
+static void on_message(Rid view, const char* message, void* user) { ... }
+Rweb_view_set_message_callback(view, on_message, NULL);</code></pre>
+      </div>
+      <div class="code" data-lang="javascript">
+<pre><code class="language-javascript">window.raven.postMessage("guardado");            // un texto llega tal cual
+window.raven.postMessage({ id: 3, ok: true });   // cualquier otra cosa, como JSON</code></pre>
+      </div>
+      <p>Los comandos dados antes de que la vista esté lista (el navegador tarda un momento en arrancar) esperan y se envían en orden.</p>
+
+      <h3>Para tags propios</h3>
+      <p><code>raven_web</code> no usa más que funciones públicas de Raven; tres existen para librerías como ella y sirven para cualquier widget hecho por código:</p>
+      <ul>
+        <li><code>Rxml_register_tag(tag, create, set_attribute, user)</code>: da un tag a un widget construido por código, con atributos propios.</li>
+        <li><code>Rwidget_set_destroy_callback</code>: avisa cuando el widget desaparece, para liberar lo que le pertenecía.</li>
+        <li><code>Rimage_decode</code>: un archivo de imagen en memoria a píxeles RGBA, en cualquier hilo.</li>
+        <li><code>Rxml_resolve_path</code>: la ruta de un archivo nombrado en el documento que se está cargando.</li>
+      </ul>
+
+      <div class="callout warn">
+        <div class="ci">&#9888;</div>
+        <p>La parte de Windows de <code>raven_web</code> (arrancar el navegador con sus tuberías, el job que lo ata a la aplicación, encontrar Edge y Chrome) no se había ejecutado en el momento de escribir la documentación original: solo pasaba una comprobación de sintaxis contra los headers de Windows. Edge y Chrome no se probaron, solo Chromium. Si algo falla, <code>RAVEN_WEB_TRACE=1</code> imprime cada mensaje del navegador y <code>RAVEN_WEB_DEBUG=1</code> deja pasar su salida de error.</p>
+      </div>
+
+      <figure class="shot">
+        <img src="assets/img/browser.png" alt="Ejemplo browser con una página web real y controles de Raven alrededor">
+        <figcaption><b>examples/browser</b> &mdash; la página es web normal (degradados, grid y un canvas animado con JavaScript); la barra y el panel de la derecha son widgets de Raven.</figcaption>
+      </figure>
+
+      <div class="pager">
+        <a href="xml.html"><span>Anterior</span>&larr; XML y XMLC</a>
+        <a class="next" href="api.html"><span>Siguiente</span>La API de C &rarr;</a>
+      </div>
+
+      <div class="footer">
+        <span>Raven Docs &middot; documentación comunitaria de Raven 0.1.3</span>
+        <span>Hecho con HTML, CSS y JavaScript sin dependencias. <a href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener">Raven en GitHub</a></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/search-index.js"></script>
+<script src="assets/js/api-index.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

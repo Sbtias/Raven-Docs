@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>XML y XMLC — Raven Docs</title>
+<meta name="description" content="Referencia completa del XML de Raven: ventana, paneles, controles, herramientas, slots, expresiones, tags propios, documentos y el compilador ravenc (XMLC).">
+<link rel="icon" type="image/png" href="assets/img/logo-white.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('raven-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
+</head>
+<body data-page="xml.html">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Abrir el menú">&equiv;</button>
+  <a class="brand" href="index.html"><img src="assets/img/logo-white.png" alt=""><span>Raven <b>Docs</b></span><span class="ver">v0.1.3</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="search-btn" id="search-open" aria-label="Buscar en la documentación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span class="label">Buscar...</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="icon-btn" id="theme-toggle" aria-label="Cambiar de tema">&#9788;</button>
+  <a class="ghbtn" href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener" aria-label="Raven en GitHub">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+    <span class="label">GitHub</span>
+  </a>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"><div id="sidebar-nav"></div></aside>
+  <main id="main">
+    <div class="content">
+
+      <div class="page-head">
+        <span class="eyebrow">Referencia XML</span>
+        <h1>Una interfaz, escrita una vez</h1>
+        <p>Raven puede construir toda la interfaz desde XML y, opcionalmente, compilar ese XML junto a tu código en un solo archivo con <code>ravenc</code>. Esta página es la referencia de los tags, atributos, slots, expresiones y del formato XMLC.</p>
+      </div>
+
+      <div class="toc">
+        <h4>En esta página</h4>
+        <ol>
+          <li><a href="#reglas">Reglas y tipos de valor</a></li>
+          <li><a href="#ventana">La ventana</a></li>
+          <li><a href="#atributos">Atributos comunes</a></li>
+          <li><a href="#slots">Slots</a></li>
+          <li><a href="#paneles">Paneles</a></li>
+          <li><a href="#controles">Controles</a></li>
+          <li><a href="#herramientas">Herramientas</a></li>
+          <li><a href="#markdown">Markdown</a></li>
+          <li><a href="#tags">Tags propios</a></li>
+          <li><a href="#xmlc">XMLC: un archivo, cualquier lenguaje</a></li>
+          <li><a href="#recarga">Recarga en vivo</a></li>
+          <li><a href="#documentos">Documentos y herramientas</a></li>
+        </ol>
+      </div>
+
+      <h2 id="reglas">Reglas y tipos de valor</h2>
+      <p>Un documento XML se carga con <code>Rwindow_create_from_xml_file</code> (raíz <code>&lt;Window&gt;</code>) o con <code>Rwidget_create_from_xml</code> (cualquier widget como raíz). Los tags son tipos de widget; los atributos, propiedades; los <code>Slot.*</code> son el slot del hijo.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid window = Rwindow_create_from_xml_file("editor.xml");
+Rid panel  = Rwidget_create_from_xml(texto, strlen(texto));</code></pre>
+      </div>
+      <ul>
+        <li>Los nombres de tag y atributo <strong>no distinguen mayúsculas</strong>.</li>
+        <li>El parser entiende elementos, atributos, texto, comentarios, CDATA, las cinco entidades predefinidas y referencias numéricas. Los archivos son UTF-8; no hay DTD ni namespaces.</li>
+        <li>Dentro de un valor de atributo, <code>&lt;</code> y <code>&amp;</code> se escriben <code>&amp;lt;</code> y <code>&amp;amp;</code>: <code>If="{Count &amp;lt; 3}"</code>.</li>
+        <li>El texto dentro de un elemento es su atributo <code>Text</code>: <code>&lt;Label&gt;Hola&lt;/Label&gt;</code> equivale a <code>&lt;Label Text="Hola"/&gt;</code>.</li>
+        <li>Los hijos se crean primero y después se aplican los atributos del padre, para que <code>Selected="1"</code> o <code>ActiveTab="2"</code> puedan referirse a ellos.</li>
+        <li>Un tag o atributo desconocido, o un valor inválido, genera un warning con línea y columna a través del callback de errores; la carga continúa.</li>
+        <li>Las rutas (<code>Source</code>, <code>Font</code>) son relativas al archivo XML, o a <code>Rxml_set_base_path</code> si el documento viene de memoria. Un archivo se carga una vez y se comparte.</li>
+      </ul>
+
+      <h3>Tipos de valor</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Tipo</th><th>Sintaxis</th></tr></thead>
+          <tbody>
+            <tr><td>número</td><td><code>12</code>, <code>0.5</code>, <code>-3</code> (siempre con punto, sin importar el locale)</td></tr>
+            <tr><td>booleano</td><td><code>true</code>/<code>false</code>, <code>yes</code>/<code>no</code>, <code>1</code>/<code>0</code></td></tr>
+            <tr><td>color</td><td><code>#RGB</code>, <code>#RGBA</code>, <code>#RRGGBB</code>, <code>#RRGGBBAA</code>, o un nombre: <code>transparent white black red green blue yellow orange cyan magenta gray</code></td></tr>
+            <tr><td>margen</td><td><code>8</code> (todos), <code>8,4</code> (horizontal, vertical), <code>1,2,3,4</code> (izquierda, arriba, derecha, abajo)</td></tr>
+            <tr><td>atajo</td><td><code>Ctrl+S</code>, <code>Ctrl+Shift+Z</code>, <code>F5</code>, <code>Alt+Enter</code>. Modificadores: <code>Ctrl</code>, <code>Shift</code>, <code>Alt</code>, <code>Super</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Las longitudes son unidades lógicas: se multiplican por la escala del monitor.</p>
+
+      <h2 id="ventana">La ventana</h2>
+      <p><code>&lt;Window&gt;</code> solo puede ser la raíz de <code>Rwindow_create_from_xml[File]</code>. Tiene un hijo de contenido, opcionalmente una <code>&lt;Island&gt;</code> flotante y cualquier número de <code>&lt;Shortcut&gt;</code> y declaraciones <code>&lt;Widget&gt;</code>.</p>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Atributo</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td><code>Title</code></td><td>texto de la barra de título</td></tr>
+            <tr><td><code>Width</code>, <code>Height</code></td><td>tamaño de cliente (800 &times; 600 por defecto)</td></tr>
+            <tr><td><code>MinWidth</code>, <code>MinHeight</code></td><td>tamaño mínimo que el usuario puede darle</td></tr>
+            <tr><td><code>Resizable</code></td><td>booleano (true por defecto)</td></tr>
+            <tr><td><code>Borderless</code>, <code>Maximized</code>, <code>Hidden</code></td><td>booleanos</td></tr>
+            <tr><td><code>ClearColor</code></td><td>color detrás del contenido (por defecto, el color <code>Window</code> del tema)</td></tr>
+            <tr><td><code>Background</code></td><td>imagen de fondo, escalada para cubrir la ventana; con glass sustituye el wallpaper del tema</td></tr>
+            <tr><td><code>CustomHeader</code></td><td>sin barra de título del sistema; un <code>HeaderBar</code> la reemplaza</td></tr>
+            <tr><td><code>Transparent</code></td><td>la ventana se puede ver a través; donde no se dibuja, se ve el escritorio</td></tr>
+            <tr><td><code>Backdrop</code></td><td><code>Transparent</code>, <code>Blur</code>, <code>Acrylic</code>, <code>Mica</code>, <code>None</code>; implica <code>Transparent</code></td></tr>
+            <tr><td><code>Theme</code></td><td>nombre del tema (<code>Dark</code>, <code>Light</code>, <code>GlassDark</code>, <code>GlassLight</code>, uno cargado) o archivo de tema</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window Title="Editor" Width="1200" Height="760" MinWidth="720" MinHeight="480"&gt;
+    &lt;Shortcut Keys="Ctrl+S" Action="file.save"/&gt;
+
+    &lt;VBox Spacing="0"&gt;
+        &lt;HeaderBar&gt;
+            &lt;MenuBar&gt;
+                &lt;Menu Text="Archivo"&gt;
+                    &lt;MenuItem Text="Abrir..." Shortcut="Ctrl+O" OnClicked="file.open"/&gt;
+                    &lt;MenuItem Text="Guardar" Shortcut="Ctrl+S" OnClicked="file.save"/&gt;
+                    &lt;Separator/&gt;
+                    &lt;MenuItem Text="Salir" Shortcut="Alt+F4" OnClicked="app.quit"/&gt;
+                &lt;/Menu&gt;
+            &lt;/MenuBar&gt;
+        &lt;/HeaderBar&gt;
+
+        &lt;Splitter Slot.Fill="1"&gt;
+            &lt;TreeView Name="arbol" Slot.Title="Proyecto" Slot.Fill="0.28"/&gt;
+            &lt;TabView Name="documentos" Slot.Title="Editor" Slot.Fill="0.72"/&gt;
+        &lt;/Splitter&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+
+      <h2 id="atributos">Atributos comunes a todo widget</h2>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Atributo</th><th>Valor</th></tr></thead>
+          <tbody>
+            <tr><td><code>Name</code> o <code>Id</code></td><td>nombre para <code>Rwidget_find</code></td></tr>
+            <tr><td><code>Width</code>, <code>Height</code></td><td>tamaño fijo; prevalece sobre el tamaño pedido</td></tr>
+            <tr><td><code>MinWidth</code>, <code>MinHeight</code>, <code>MaxWidth</code>, <code>MaxHeight</code></td><td>límites del tamaño pedido</td></tr>
+            <tr><td><code>Visibility</code></td><td><code>Visible</code>, <code>Hidden</code> (conserva su sitio), <code>Collapsed</code> (no ocupa espacio)</td></tr>
+            <tr><td><code>Enabled</code></td><td>un widget deshabilitado deshabilita a sus hijos</td></tr>
+            <tr><td><code>Opacity</code></td><td>0..1, se aplica también a los hijos</td></tr>
+            <tr><td><code>Clip</code></td><td>recorta a los hijos a sus límites</td></tr>
+            <tr><td><code>HitTestable</code></td><td><code>false</code> deja pasar el ratón a lo que hay detrás</td></tr>
+            <tr><td><code>Focusable</code></td><td>puede recibir el foco</td></tr>
+            <tr><td><code>Tooltip</code></td><td>texto al reposar el cursor</td></tr>
+            <tr><td><code>Material</code></td><td><code>Solid</code>, <code>Glass</code>, <code>FrostedGlass</code>, <code>TintedGlass</code>, <code>Default</code></td></tr>
+            <tr><td><code>Class</code></td><td>clases separadas por espacios: <code>Class="card danger"</code></td></tr>
+            <tr><td><code>Theme</code></td><td>tema para este widget y lo que contiene; <code>Default</code> vuelve al de alrededor</td></tr>
+            <tr><td><code>Appear</code></td><td>transición al aparecer: <code>None Fade Pop Zoom FlyUp FlyDown FlyLeft FlyRight Drop SlideLeft SlideRight</code></td></tr>
+            <tr><td><code>AppearDelay</code></td><td>segundos antes de la transición; escalonar delays crea una entrada en cascada</td></tr>
+            <tr><td><code>WindowDrag</code></td><td>arrastrar este widget mueve la ventana (con <code>CustomHeader</code>)</td></tr>
+            <tr><td><code>Cursor</code></td><td><code>Arrow IBeam Hand Crosshair ResizeH ResizeV ResizeNWSE ResizeNESW Move NotAllowed</code></td></tr>
+            <tr><td><code>Action</code>, <code>OnClicked</code>, <code>OnChanged</code>, <code>OnCommitted</code>, <code>OnActivated</code></td><td>nombre de la acción del evento principal</td></tr>
+            <tr><td><code>Color.&lt;Rol&gt;</code></td><td>sobrescribe un color del tema para este widget: <code>Color.Accent="#E5484D"</code></td></tr>
+            <tr><td><code>Metric.&lt;Nombre&gt;</code></td><td>sobrescribe una métrica: <code>Metric.CornerRadius="0"</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Acciones</h3>
+      <p>Un widget tiene un nombre de acción; las cinco variantes <code>On...</code> son sinónimos para legibilidad. La acción se dispara con el evento principal:</p>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Widget</th><th>Cuándo dispara</th></tr></thead>
+          <tbody>
+            <tr><td>Button, MenuItem</td><td>clic</td></tr>
+            <tr><td>Checkbox, Slider, SpinBox, ComboBox, TabView, Expander</td><td>cambio de valor</td></tr>
+            <tr><td>TextInput</td><td>Enter</td></tr>
+            <tr><td>ListView, TreeView, TileView</td><td>fila o tile activado (doble clic o Enter)</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Roles de color y métricas</h3>
+      <p><strong>Colores:</strong> <code>Window Panel Border Text TextDisabled TextPlaceholder Accent AccentHovered AccentPressed AccentText Control ControlHovered ControlPressed ControlBorder Input Focus Selection RowHovered Track Handle HandleHovered Separator Header HeaderHovered TabActive Popup PopupBorder Shadow Tooltip TooltipText Switch Success Warning Danger Link Code</code>.</p>
+      <p><strong>Métricas:</strong> <code>FontSize CornerRadius BorderWidth ControlHeight PaddingX PaddingY Spacing ScrollbarSize RowHeight Indent SplitterSize CheckSize SliderHandleSize PopupRadius BlurRadius</code>.</p>
+      <p>En un tema de cristal, el alfa de un color es la fuerza del tinte: <code>Color.Control="#FF375F60"</code> es un botón de cristal rosa; <code>#FF375F</code> es opaco.</p>
+
+      <h2 id="slots">Slots</h2>
+      <p>El slot pertenece al hijo y lo lee el panel padre. Cada panel usa los atributos que tienen sentido para él. Los más habituales:</p>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Atributo</th><th>Valor</th><th>Lo usa</th></tr></thead>
+          <tbody>
+            <tr><td><code>Slot.Padding</code></td><td>margen alrededor del hijo</td><td>todos los paneles y la ventana</td></tr>
+            <tr><td><code>Slot.HAlign</code></td><td><code>Fill</code> (defecto), <code>Left</code>, <code>Center</code>, <code>Right</code></td><td>VBox, Grid, Overlay, Border, SizeBox, ScrollBox, Switcher</td></tr>
+            <tr><td><code>Slot.VAlign</code></td><td><code>Fill</code> (defecto), <code>Top</code>, <code>Center</code>, <code>Bottom</code></td><td>HBox, Grid, Overlay, Border, SizeBox, ScrollBox, Switcher</td></tr>
+            <tr><td><code>Slot.Fill</code></td><td>parte del espacio libre; sin él, el hijo conserva su tamaño</td><td>VBox, HBox; tamaño de panel en Splitter</td></tr>
+            <tr><td><code>Slot.Auto</code></td><td><code>true</code>: vuelve al tamaño pedido</td><td>VBox, HBox</td></tr>
+            <tr><td><code>Slot.MaxSize</code></td><td>límite del hijo que rellena</td><td>VBox, HBox</td></tr>
+            <tr><td><code>Slot.Column</code>, <code>Slot.Row</code></td><td>celda, desde 0</td><td>Grid</td></tr>
+            <tr><td><code>Slot.ColumnSpan</code>, <code>Slot.RowSpan</code></td><td>celdas cubiertas</td><td>Grid</td></tr>
+            <tr><td><code>Slot.Anchors</code></td><td><code>x,y</code> o <code>minX,minY,maxX,maxY</code></td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Position</code></td><td><code>x,y</code> desde el ancla</td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Size</code></td><td><code>ancho,alto</code></td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Alignment</code></td><td>pivote <code>x,y</code>, 0..1</td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Title</code></td><td>texto de la pestaña</td><td>TabView, DockArea</td></tr>
+            <tr><td><code>Slot.Dock</code></td><td><code>Left</code>, <code>Right</code>, <code>Top</code>, <code>Bottom</code>, <code>Tab</code></td><td>DockArea</td></tr>
+            <tr><td><code>Slot.DockTo</code></td><td>panel de referencia</td><td>DockArea</td></tr>
+            <tr><td><code>Slot.DockSize</code></td><td>parte del espacio cortado, 0..1</td><td>DockArea</td></tr>
+            <tr><td><code>Slot.Closable</code></td><td><code>false</code> quita el botón de cerrar de la pestaña</td><td>DockArea</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="paneles">Paneles</h2>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Tag (alias)</th><th>Hijos</th><th>Atributos</th></tr></thead>
+          <tbody>
+            <tr><td><code>VBox</code> (<code>VerticalBox</code>)</td><td>apilados de arriba abajo</td><td><code>Spacing</code></td></tr>
+            <tr><td><code>HBox</code> (<code>HorizontalBox</code>)</td><td>de izquierda a derecha</td><td><code>Spacing</code></td></tr>
+            <tr><td><code>Grid</code> (<code>GridPanel</code>)</td><td>colocados por <code>Slot.Column</code> / <code>Slot.Row</code></td><td><code>Spacing</code>; <code>Columns</code>, <code>Rows</code>: <code>auto</code> o una parte de relleno, p. ej. <code>Columns="auto,1,2"</code></td></tr>
+            <tr><td><code>UniformGrid</code></td><td>celdas iguales, fila a fila</td><td><code>Columns</code>, <code>MinCellSize</code>, <code>Spacing</code></td></tr>
+            <tr><td><code>Overlay</code></td><td>apilados, el último encima</td><td>&mdash;</td></tr>
+            <tr><td><code>Border</code></td><td>un hijo con fondo</td><td><code>Padding</code>, <code>Background</code>, <code>BorderColor</code>, <code>BorderWidth</code>, <code>CornerRadius</code>, <code>Shadow</code>, <code>Material</code></td></tr>
+            <tr><td><code>SizeBox</code> (<code>Box</code>)</td><td>un hijo con tamaño forzado</td><td><code>Width</code>, <code>Height</code>, <code>AspectRatio</code></td></tr>
+            <tr><td><code>Spacer</code></td><td>ninguno: espacio vacío</td><td><code>Width</code>, <code>Height</code> o <code>Slot.Fill</code></td></tr>
+            <tr><td><code>ScrollBox</code></td><td>contenido desplazable</td><td><code>Orientation</code> (Vertical por defecto), <code>ScrollBoth</code>, <code>Spacing</code></td></tr>
+            <tr><td><code>Splitter</code></td><td>paneles con separadores arrastrables</td><td><code>Orientation</code> (Horizontal = lado a lado), <code>MinPaneSize</code></td></tr>
+            <tr><td><code>WrapBox</code></td><td>de izquierda a derecha, saltando de línea</td><td><code>Spacing</code></td></tr>
+            <tr><td><code>Canvas</code> (<code>CanvasPanel</code>)</td><td>colocación libre con anclas</td><td>&mdash;</td></tr>
+            <tr><td><code>Switcher</code></td><td>muestra un hijo a la vez</td><td><code>Index</code></td></tr>
+            <tr><td><code>TabView</code> (<code>Tabs</code>)</td><td>una pestaña por hijo (<code>Slot.Title</code>)</td><td><code>ActiveTab</code></td></tr>
+            <tr><td><code>Expander</code></td><td>un hijo bajo una cabecera plegable</td><td><code>Title</code>, <code>Expanded</code></td></tr>
+            <tr><td><code>DockArea</code></td><td>cada hijo es un panel con pestaña, movible</td><td><code>Movable</code>, <code>Layout</code></td></tr>
+            <tr><td><code>HeaderBar</code> (<code>TitleBar</code>)</td><td>barra de título personalizada</td><td><code>Title</code>, <code>Buttons</code>, <code>ButtonSide</code>, <code>TitleAlign</code>, <code>Background</code></td></tr>
+            <tr><td><code>BackgroundBlur</code></td><td>un hijo sobre un panel desenfocado</td><td><code>Style</code> (Plain, Frosted, Glass, Native), <code>Radius</code>, <code>Tint</code>, <code>Saturation</code>, <code>Grain</code>, <code>Shadow</code>, <code>Padding</code>, <code>CornerRadius</code></td></tr>
+            <tr><td><code>Island</code> (<code>Notch</code>, <code>DynamicIsland</code>)</td><td>primer hijo plegado, segundo desplegado</td><td><code>Expanded</code>, <code>ExpandOnHover</code>, <code>ExpandOnClick</code>, <code>Attached</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Grid Columns="auto,1,120" Rows="auto,auto" Spacing="8"&gt;
+    &lt;Label Text="Nombre" Slot.Column="0" Slot.Row="0" Slot.VAlign="Center"/&gt;
+    &lt;TextInput Name="nombre" Slot.Column="1" Slot.Row="0"/&gt;
+    &lt;Button Text="..." Slot.Column="2" Slot.Row="0"/&gt;
+
+    &lt;Label Text="Notas" Slot.Column="0" Slot.Row="1"/&gt;
+    &lt;TextEditor Slot.Column="1" Slot.Row="1" Slot.ColumnSpan="2" Height="120"/&gt;
+&lt;/Grid&gt;</code></pre>
+      </div>
+
+      <h2 id="controles">Controles</h2>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Tag (alias)</th><th>Atributos principales</th></tr></thead>
+          <tbody>
+            <tr><td><code>Label</code> (<code>Text</code>, <code>TextBlock</code>)</td><td><code>Text</code>, <code>TextSize</code>/<code>FontSize</code>, <code>Font</code>, <code>TextAlign</code>, <code>Wrap</code>, <code>Color</code>, <code>Markdown</code></td></tr>
+            <tr><td><code>Button</code></td><td><code>Text</code>, <code>Style</code> (<code>Default</code>, <code>Primary</code>, <code>Flat</code>)</td></tr>
+            <tr><td><code>Checkbox</code></td><td><code>Text</code>, <code>Checked</code>, <code>Style</code> (<code>Check</code>, <code>Radio</code>, <code>Switch</code>)</td></tr>
+            <tr><td><code>Slider</code></td><td><code>Min</code>, <code>Max</code>, <code>Value</code>, <code>Step</code>, <code>Orientation</code></td></tr>
+            <tr><td><code>ProgressBar</code></td><td><code>Value</code> (0..1)</td></tr>
+            <tr><td><code>SpinBox</code></td><td><code>Min</code>, <code>Max</code>, <code>Value</code>, <code>Step</code>, <code>Decimals</code></td></tr>
+            <tr><td><code>TextInput</code> (<code>TextBox</code>, <code>EditableText</code>)</td><td><code>Text</code>, <code>Placeholder</code>, <code>Password</code>, <code>ReadOnly</code>, <code>MaxLength</code></td></tr>
+            <tr><td><code>ComboBox</code></td><td><code>Selected</code> (índice), hijos <code>&lt;Item Text="..."/&gt;</code> o <code>Items="A|B|C"</code></td></tr>
+            <tr><td><code>ListView</code></td><td><code>Selected</code>, <code>&lt;Item&gt;</code> o <code>Items</code>; listas enormes con <code>Rlist_view_set_virtual_items</code></td></tr>
+            <tr><td><code>TreeView</code></td><td><code>&lt;Item Text="..." Expanded="true"&gt;</code> anidados</td></tr>
+            <tr><td><code>TileView</code></td><td><code>TileWidth</code>, <code>TileHeight</code>, <code>IconSize</code>, <code>Layout</code> (<code>Tiles</code>/<code>Rows</code>), <code>Spacing</code>, <code>EmptyText</code>, <code>DragType</code></td></tr>
+            <tr><td><code>Image</code></td><td><code>Source</code>, <code>Tint</code>, <code>Stretch</code> (<code>Fill Fit Cover None</code>), <code>Region</code>, <code>CornerRadius</code></td></tr>
+            <tr><td><code>Separator</code></td><td><code>Orientation</code></td></tr>
+            <tr><td><code>MenuBar</code> &middot; <code>Menu</code> &middot; <code>MenuItem</code></td><td><code>Text</code>, <code>Shortcut</code>, <code>Checkable</code>, <code>Checked</code>; menús anidados y <code>&lt;Separator/&gt;</code></td></tr>
+            <tr><td><code>Viewport</code></td><td><code>Source</code>, <code>Stretch</code>, <code>FlipY</code>, <code>Realtime</code></td></tr>
+            <tr><td><code>Custom</code></td><td>pintado por la aplicación con <code>Rcustom_set_paint_callback</code></td></tr>
+            <tr><td><code>TextEditor</code> (<code>TextArea</code>)</td><td><code>Text</code>, <code>Language</code>, <code>LineNumbers</code>, <code>Wrap</code>, <code>ReadOnly</code>, <code>Placeholder</code>, <code>TabSize</code>, <code>TabSpaces</code>, <code>Completion</code>, <code>AutoPairs</code>, <code>Zoom</code>, <code>Markdown</code></td></tr>
+            <tr><td><code>FileBrowser</code></td><td><code>Directory</code>, <code>Mode</code> (<code>Open Save Folder</code>), <code>Filter</code>, <code>FileName</code>, <code>DefaultExtension</code>, <code>ShowHidden</code>, <code>Multiple</code>, <code>Controls</code>, <code>Places</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Los atajos de un <code>MenuItem</code> funcionan sin necesidad de un <code>&lt;Shortcut&gt;</code>: la ventana los busca en sus menús cuando se pulsan las teclas.</p>
+
+      <h2 id="herramientas">Herramientas</h2>
+      <h3>ColorPicker</h3>
+      <div class="table-wrap compact">
+        <table>
+          <tbody>
+            <tr><td><code>Color</code></td><td>el color</td></tr>
+            <tr><td><code>Previous</code></td><td>color mostrado al lado, para comparar</td></tr>
+            <tr><td><code>Alpha</code></td><td><code>false</code> oculta la tira de opacidad</td></tr>
+            <tr><td><code>Popup</code></td><td>un swatch que abre el selector al pulsarlo</td></tr>
+            <tr><td><code>Compact</code></td><td>solo cuadrado, tonos y opacidad</td></tr>
+            <tr><td><code>Numbers</code></td><td><code>RGB</code> o <code>HSV</code></td></tr>
+            <tr><td><code>Swatches</code></td><td><code>"#FF453A, #0A84FF, white"</code></td></tr>
+            <tr><td><code>OnChanged</code></td><td>acción al cambiar el color</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Timeline</h3>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Timeline Duration="12" FrameRate="24" Height="180"&gt;
+    &lt;Track Name="Cámara" Color="#0A84FF"&gt;
+        &lt;Clip Start="0" Length="3.5" Label="Plano general"/&gt;
+        &lt;Key Time="6"/&gt;
+    &lt;/Track&gt;
+    &lt;Marker Time="4" Label="Intro"/&gt;
+&lt;/Timeline&gt;</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <tbody>
+            <tr><td><code>Duration</code></td><td>duración en segundos</td></tr>
+            <tr><td><code>Time</code></td><td>posición del playhead</td></tr>
+            <tr><td><code>FrameRate</code></td><td>fps: los tiempos se ajustan a frames; 0 = ninguno</td></tr>
+            <tr><td><code>Snapping</code></td><td>ajuste a frames, al playhead y entre elementos</td></tr>
+            <tr><td><code>ViewStart</code>, <code>ViewEnd</code></td><td>rango visible</td></tr>
+            <tr><td><code>Loop</code>, <code>Playing</code></td><td>repetir y reproducir</td></tr>
+            <tr><td><code>HeaderWidth</code>, <code>TrackHeight</code></td><td>medidas; 0 = automáticas</td></tr>
+            <tr><td><code>OnChanged</code></td><td>acción al mover, estirar o borrar algo</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p><code>&lt;Track&gt;</code>: <code>Name</code>, <code>Color</code>, <code>Height</code>, <code>Locked</code>, <code>Muted</code>; contiene <code>&lt;Clip&gt;</code> y <code>&lt;Key&gt;</code>. <code>&lt;Clip&gt;</code>: <code>Start</code>, <code>Length</code> o <code>End</code>, <code>Label</code>, <code>Color</code>, <code>Selected</code>. <code>&lt;Key&gt;</code>: <code>Time</code>, <code>Label</code>, <code>Color</code>. <code>&lt;Marker&gt;</code>: <code>Time</code>, <code>Label</code>, <code>Color</code>.</p>
+
+      <h3>NodeGraph</h3>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;NodeGraph Name="grafo" FrameAll="true"&gt;
+    &lt;Type Name="number" Color="#64D2FF"/&gt;
+
+    &lt;Node Name="ruido" Title="Ruido" X="40" Y="60" Color="#FF9F0A"&gt;
+        &lt;Output Name="valor" Label="Value" Type="number"/&gt;
+        &lt;Slider Value="0.4" Width="150"/&gt;
+    &lt;/Node&gt;
+
+    &lt;Node Name="mezcla" Title="Blend" X="320" Y="90"&gt;
+        &lt;Input Name="a" Label="A" Type="number"/&gt;
+        &lt;Input Name="b" Label="B" Type="number"/&gt;
+        &lt;Output Name="salida" Label="Out" Type="number"/&gt;
+    &lt;/Node&gt;
+
+    &lt;Link From="ruido.valor" To="mezcla.a"/&gt;
+&lt;/NodeGraph&gt;</code></pre>
+      </div>
+      <p><code>&lt;Node&gt;</code> acepta cualquier widget dentro: se dibuja dentro del nodo y funciona a cualquier zoom. Los pins de distinto tipo no se conectan; un pin sin tipo se conecta con cualquiera. <code>Flow</code> controla los pulsos que recorren los cables: <code>Auto</code> (con el puntero encima), <code>true</code> o <code>false</code>.</p>
+
+      <h3>BlockEditor</h3>
+      <p>Un editor de bloques que encajan entre sí, al estilo Scratch. Se declaran los tipos con <code>&lt;Kind&gt;</code> y las categorías con <code>&lt;Category&gt;</code>:</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;BlockEditor Height="340"&gt;
+    &lt;Category Name="Eventos" Color="#FFBF00"/&gt;
+    &lt;Category Name="Control" Color="#FFAB19"/&gt;
+
+    &lt;Kind Name="inicio" Label="when started" Shape="Hat" Category="Eventos"/&gt;
+    &lt;Kind Name="repetir" Label="repeat %n{10}" Shape="C" Category="Control"/&gt;
+    &lt;Kind Name="mover" Label="move %n{10} steps" Shape="Statement" Category="Control"/&gt;
+    &lt;Kind Name="suma" Label="%n + %n" Shape="Reporter" Category="Control"/&gt;
+&lt;/BlockEditor&gt;</code></pre>
+      </div>
+      <p>En <code>Label</code>, <code>%n</code> es un número, <code>%s</code> un texto, <code>%b</code> una condición, <code>%r</code> cualquier valor y <code>%m</code> un menú. <code>{10}</code> después de un slot es su valor por defecto. <code>|</code> separa las secciones de un bloque C (cada una seguida de una boca): <code>"if %b then|else"</code>.</p>
+
+      <h2 id="markdown">Markdown</h2>
+      <p><code>Markdown="true"</code> en un <code>Label</code> renderiza el texto: encabezados, negrita, cursiva, tachado, código, enlaces, listas (con casillas), citas, bloques de código coloreados, tablas, reglas, saltos de línea e imágenes. En un <code>TextEditor</code>, el mismo flag mantiene el texto tal como se escribe y lo estiliza donde está.</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Label Markdown="true" Wrap="true"&gt;
+## Notas
+Texto **fuerte**, *énfasis*, `código` y un [enlace](https://example.org).
+
+- una lista
+- [x] con casilla
+
+&gt; una cita
+
+| Columna | Valor |
+|---|---|
+| una | 1 |
+&lt;/Label&gt;</code></pre>
+      </div>
+      <p>Un enlace <code>[texto](https://...)</code> abre el navegador del sistema; <code>[texto](action:nombre)</code> dispara la acción <code>nombre</code>. <code>Rlabel_set_link_callback</code> los recibe todos. Las imágenes remotas se cargan de forma asíncrona (requiere <code>curl</code> en macOS/Linux y WinHTTP en Windows).</p>
+
+      <h2 id="tags">Tags propios</h2>
+      <p>Un documento puede declarar sus propios tags con parámetros y reutilizarlos como cualquier widget de la librería:</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Widget Name="Field" Label="Name" Hint="" Wide="false"&gt;
+    &lt;HBox Spacing="8"&gt;
+        &lt;Label Text="{Label}:" Width="{Wide ? 140 : 90}"/&gt;
+        &lt;TextInput Placeholder="{Hint}" Slot.Fill="1"/&gt;
+        &lt;Children/&gt;
+    &lt;/HBox&gt;
+&lt;/Widget&gt;
+
+&lt;Field Label="Email" Hint="tu@ejemplo.com" Name="email"/&gt;
+&lt;Field Label="Contraseña" Wide="true"&gt;&lt;Button Text="Mostrar"/&gt;&lt;/Field&gt;</code></pre>
+      </div>
+      <ul>
+        <li>Los atributos de <code>&lt;Widget&gt;</code> distintos de <code>Name</code> son sus <strong>parámetros</strong>, con su valor por defecto. Contiene exactamente un elemento: lo que representa el tag.</li>
+        <li>Dentro, <code>{...}</code> se calcula y se sustituye. <code>{{</code> y <code>}}</code> escriben una llave literal.</li>
+        <li>Donde se usa el tag, los atributos que son parámetros pasan sus valores; los demás (<code>Name</code>, <code>Slot.Fill</code>, <code>OnClicked</code>, <code>Material</code>...) van al elemento que representa el tag. El texto dentro del tag es su <code>Text</code>.</li>
+        <li><code>&lt;Children/&gt;</code> se sustituye por los hijos dados al tag; <code>&lt;Children Name="footer"/&gt;</code> por los marcados con <code>Into="footer"</code>.</li>
+        <li>Una declaración se conoce desde que se lee hasta que la librería se cierra, en todos los documentos posteriores. Re-declarar un nombre lo reemplaza. No puede tomar el nombre de un tag de la librería.</li>
+        <li>Un tag puede usar tags declarados antes, pero no a sí mismo.</li>
+      </ul>
+
+      <h3>Elementos de composición</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Elemento o atributo</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>&lt;Widget Name="..." Param="default" ...&gt;</code></td><td>declara un tag</td></tr>
+            <tr><td><code>&lt;Widgets&gt;</code></td><td>raíz de un archivo que solo contiene declaraciones</td></tr>
+            <tr><td><code>&lt;Children/&gt;</code>, <code>&lt;Children Name="x"/&gt;</code></td><td>dónde van los hijos dados al tag</td></tr>
+            <tr><td><code>Into="x"</code></td><td>en un hijo: va a <code>&lt;Children Name="x"/&gt;</code></td></tr>
+            <tr><td><code>If="..."</code></td><td>en cualquier elemento: se conserva si el valor es verdadero</td></tr>
+            <tr><td><code>&lt;If Test="..."&gt;</code></td><td>conserva su contenido si el test es verdadero</td></tr>
+            <tr><td><code>&lt;Repeat Count="3" Var="i"&gt;</code></td><td>repite el contenido; <code>{i}</code> es 0, 1, 2</td></tr>
+            <tr><td><code>&lt;ForEach Items="a|b|c" Var="x" Index="n" Separator="|"&gt;</code></td><td>repite por cada texto; <code>{x}</code> es el texto, <code>{n}</code> su índice</td></tr>
+            <tr><td><code>&lt;Include Source="file.xml"/&gt;</code></td><td>trae otro archivo: sus declaraciones y su elemento si lo tiene</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Expresiones</h3>
+      <p>Números, textos entre comillas simples, parámetros y variables; <code>+ - * / %</code> (<code>+</code> concatena textos), <code>== != &lt; &lt;= &gt; &gt;=</code>, <code>&amp;&amp; || !</code>, <code>a ? b : c</code>, paréntesis; <code>min(a,b)</code>, <code>max(a,b)</code>, <code>round</code>, <code>floor</code>, <code>ceil</code>, <code>abs</code>, <code>len(texto)</code>, <code>upper</code>, <code>lower</code>, <code>empty(texto)</code>, <code>default(valor, alternativo)</code>. <code>{Instance}</code> es un número distinto para cada uso de un tag, útil para nombres únicos. Es falso <code>false</code>, <code>0</code> y el texto vacío.</p>
+      <div class="callout">
+        <div class="ci">&#128161;</div>
+        <p>Las llaves solo se evalúan dentro de un <code>&lt;Widget&gt;</code>, un <code>&lt;Repeat&gt;</code> o un <code>&lt;ForEach&gt;</code>. En el resto del documento son caracteres normales, así que no rompen CSS ni plantillas.</p>
+      </div>
+
+      <h3>Tags registrados desde C</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static Rid make_gauge(const char* tag, void* user) {
+    return Rwidget_create(R_WIDGET_CUSTOM);   /* + callbacks de medida y pintado */
+}
+
+static int gauge_attribute(Rid widget, const char* name, const char* value, void* user) {
+    if (strcmp(name, "Level") != 0) return R_FALSE;  /* no es mío: Raven maneja Name, Width, Slot... */
+    /* ... */
+    return R_TRUE;
+}
+
+Rxml_register_tag("Gauge", make_gauge, gauge_attribute, NULL);
+/* Ahora: &lt;Gauge Level="0.7" Width="120"/&gt; */</code></pre>
+      </div>
+      <p><code>&lt;WebView&gt;</code> de <code>raven_web</code> es un tag de este tipo. Desde C también puedes leer declaraciones por delante de los documentos con <code>Rxml_register_widgets</code> y <code>Rxml_register_widgets_from_file</code>.</p>
+
+      <h2 id="xmlc">XMLC: un archivo, cualquier lenguaje</h2>
+      <p>XMLC es la forma de escribir <strong>la interfaz y su código en un solo archivo</strong>. Los scripts son código normal dentro de <code>&lt;script&gt;</code>; el XML se convierte en tablas que construye <code>Rwindow_create_from_compiled</code>, sin leer XML en tiempo de ejecución. <code>ravenc</code> genera un fuente del lenguaje elegido, y el compilador de ese lenguaje comprueba todo.</p>
+
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;!-- src/main.xmlrs: un programa Rust completo --&gt;
+&lt;script&gt;
+use raven::*;
+use std::sync::atomic::{AtomicI32, Ordering};
+
+static CLICKS: AtomicI32 = AtomicI32::new(0);
+
+fn on_hello(_sender: Rid, _action: &amp;str) {           // OnClicked="{on_hello}"
+    let n = CLICKS.fetch_add(1, Ordering::SeqCst) + 1;
+    let text = cstr(&amp;format!("{} clicks", n));
+    unsafe { Rlabel_set_text(ui().status, text.as_ptr()) };   // Name="status"
+}
+
+fn main() {
+    unsafe { Rinit(R_BACKEND_VULKAN) };
+    main_create();                                     // hecho por ravenc
+    unsafe { while Rdraw_frame() != 0 {} Rshutdown() };
+}
+&lt;/script&gt;
+
+&lt;Window Title="Hello" Width="400" Height="200"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="24"&gt;
+        &lt;Label Name="status"&gt;Not clicked yet&lt;/Label&gt;
+        &lt;Button Text="Click me" Style="Primary" OnClicked="{on_hello}"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+
+      <h3>Extensiones y herramientas</h3>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Archivo</th><th>Lenguaje</th><th>Se compila con</th><th>Firma de <code>{f}</code></th><th>Widgets</th></tr></thead>
+          <tbody>
+            <tr><td><code>.xmlc</code></td><td>C</td><td>CMake: <code>raven_target_xmlc</code></td><td><code>void f(Rid, const char*, void*)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlc++</code>, <code>.xmlcpp</code></td><td>C++</td><td>CMake: <code>raven_target_xmlc</code></td><td><code>void f(Rid, const char*)</code> o lambda</td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlrs</code></td><td>Rust</td><td>Cargo: <code>raven_build::compile</code> en <code>build.rs</code></td><td><code>fn f(Rid, &amp;str)</code></td><td><code>ui().x</code></td></tr>
+            <tr><td><code>.xmlpy</code></td><td>Python</td><td><code>import raven_xmlpy</code> y luego <code>import main</code></td><td><code>def f(sender, action)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlgo</code></td><td>Go</td><td><code>//go:generate ravenc main.xmlgo -o main.xmlgo.go</code></td><td><code>func f(raven.ID, string)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlcs</code></td><td>C#</td><td>MSBuild: <code>Raven.XmlCs.targets</code></td><td><code>static void F(uint, string)</code></td><td><code>MainUi.x</code></td></tr>
+            <tr><td><code>.xmlzig</code></td><td>Zig</td><td><code>build.zig</code>: <code>xmlzig.compile</code></td><td><code>fn f(Rid, ?[*:0]const u8, ?*anyopaque) callconv(.C) void</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmllua</code></td><td>LuaJIT</td><td><code>require("raven_xmllua")</code> y luego <code>require("main")</code></td><td><code>function f(sender, action)</code> global</td><td><code>ui.x</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>El compilador</h3>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">ravenc main.xmlrs -o main.xmlrs.rs
+ravenc main.xmlpy -o main.xmlpy.py --lang python --name main</code></pre>
+      </div>
+      <p><code>ravenc</code> deduce el lenguaje de la extensión. <code>--lang</code> lo fuerza (<code>c</code>, <code>cpp</code>, <code>rust</code>, <code>python</code>, <code>go</code>, <code>csharp</code>, <code>zig</code>, <code>lua</code>) y <code>--name</code> cambia el nombre de la función generada (<code>NAME_create</code>; por defecto, el nombre del archivo).</p>
+
+      <h3>Integración por lenguaje</h3>
+      <div class="code" data-lang="cmake">
+<pre><code class="language-cmake"># C y C++: CMake
+find_package(raven REQUIRED)
+add_executable(hello main.xmlc)          # o main.xmlc++
+target_link_libraries(hello PRIVATE raven::raven)
+raven_target_xmlc(hello)                 # ravenc procesa cada .xmlc / .xmlc++ del target</code></pre>
+      </div>
+      <div class="code" data-lang="rust">
+<pre><code class="language-rust">// build.rs: convierte src/main.xmlrs en $OUT_DIR/main.xmlrs.rs
+fn main() { raven_build::compile("src/main.xmlrs"); }
+
+// src/main.rs: el programa es el .xmlrs
+include!(concat!(env!("OUT_DIR"), "/main.xmlrs.rs"));</code></pre>
+      </div>
+      <div class="code" data-lang="python">
+<pre><code class="language-python">import raven_xmlpy
+import main          # main.xmlpy, compilado al importarlo
+
+# o desde la línea de comandos:
+# python -m raven_xmlpy main.xmlpy</code></pre>
+      </div>
+      <div class="code" data-lang="go">
+<pre><code class="language-go">//go:generate ravenc main.xmlgo -o main.xmlgo.go
+package main
+
+// El archivo generado declara main_create(), ui y los callbacks.</code></pre>
+      </div>
+      <p>En C# se importa <code>bindings/csharp/Raven.XmlCs.targets</code> desde el <code>.csproj</code>; en Zig, <code>xmlzig.compile</code> desde <code>build.zig</code>; en LuaJIT, <code>require("raven_xmllua")</code> antes de importar el módulo compilado.</p>
+
+      <h3>Ventajas de XMLC</h3>
+      <ul>
+        <li>Los scripts son código normal: cualquier header, crate, paquete o módulo; sin escapes XML (<code>a &lt; b &amp;&amp; c</code> se escribe tal cual). Tantos <code>&lt;script&gt;</code> como quieras.</li>
+        <li><strong>Los errores apuntan a tu archivo.</strong> En Rust, Go, C# y Zig los scripts conservan sus números de línea en el archivo generado; en C y C++ se usa <code>#line</code>. El compilador dice <code>main.xmlrs:12</code> y el IDE lo abre ahí.</li>
+        <li>No hay header ni glue: en C, otro archivo solo declara <code>Rid main_create(void);</code>.</li>
+        <li>Todo lo del XML funciona igual compilado: tags declarados, <code>@claves</code> de traducciones, temas, <code>Slot.*</code>...</li>
+        <li>Los <code>.xml</code> planos se siguen leyendo en tiempo de ejecución con recarga en vivo: úsalos mientras diseñas y compila a <code>.xml…</code> para distribuir.</li>
+      </ul>
+
+      <h2 id="recarga">Recarga en vivo</h2>
+      <p>Una ventana o widget creado desde archivo, los archivos que incluye, los archivos de tags declarados y los archivos de tema se vigilan mientras la aplicación corre. Al guardar, la interfaz sigue estos criterios:</p>
+      <ul>
+        <li>Un elemento cuyos atributos cambiaron conserva su widget (handle, callbacks, estado: scroll, texto escrito, selección) y recibe los nuevos valores.</li>
+        <li>Los elementos se emparejan por <code>Name</code>; si no hay, por contenido; si tampoco, por posición entre los del mismo tag. Los nuevos se crean; los que desaparecen se borran.</li>
+        <li>Un widget que gestiona su propio contenido (ComboBox, Timeline, NodeGraph, menús...) se reconstruye cuando cambian los elementos internos.</li>
+        <li>Un archivo con un error no cambia nada y reporta el error.</li>
+      </ul>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rxml_set_reload_callback(on_reload, NULL);   /* tras cada recarga: vuelve a buscar widgets */
+Rxml_set_live_reload(R_FALSE);               /* desactiva la vigilancia (o RAVEN_LIVE_RELOAD=0) */
+Rxml_check_files();                          /* comprueba ahora en vez de al siguiente tick */</code></pre>
+      </div>
+      <p>Los documentos creados desde texto (<code>Rwindow_create_from_xml</code>) no son archivos y no se vigilan. La vigilancia comprueba cinco veces por segundo.</p>
+
+      <h2 id="documentos">Documentos y herramientas</h2>
+      <p>Para un editor visual o una herramienta que manipule la interfaz, Raven expone el XML como un árbol de nodos editable:</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RXmlError error;
+Rid doc = Rxml_document_parse(xml, strlen(xml), &amp;error);
+if (doc == R_INVALID_ID) {
+    printf("línea %d: %s\n", error.line, error.message);
+}
+
+Rid root = Rxml_document_get_root(doc);
+Rid child = Rxml_node_add_child(root, "Label", -1);
+Rxml_node_set_attribute(child, "Text", "Hola &amp; adiós");
+
+const char* text = Rxml_document_to_string(doc);   /* comentarios conservados */
+Rxml_document_save(doc, "salida.xml");
+
+Rid widget = Rxml_document_create_widget(doc);
+Rid nodo = Rwidget_get_xml_node(widget);           /* el widget conoce su nodo */
+Rid w = Rxml_node_get_widget(nodo);                /* y el nodo su widget */
+Rxml_document_destroy(doc);</code></pre>
+      </div>
+      <p>La API de introspección <code>Rxml_get_tag_count</code>, <code>Rxml_get_tag_name</code>, <code>Rxml_get_tag_description</code>, <code>Rxml_get_tag_children</code>, <code>Rxml_get_attribute_count</code> y <code>Rxml_get_attribute_info</code> devuelve las tablas de esta página como datos. El diseñador <code>raven_designer</code> está construido sobre ellas.</p>
+      <div class="callout tip">
+        <div class="ci">&#128161;</div>
+        <p><code>Rwidget_set_attribute(widget, "Text", "Hola")</code> cambia una propiedad en tiempo de ejecución con el mismo nombre que usarías en XML. Es la forma rápida de ajustar algo sin buscar la función específica.</p>
+      </div>
+
+      <div class="pager">
+        <a href="guia.html"><span>Anterior</span>&larr; Guía</a>
+        <a class="next" href="interfaz.html"><span>Siguiente</span>Interfaz y temas &rarr;</a>
+      </div>
+
+      <div class="footer">
+        <span>Raven Docs &middot; XML y XMLC</span>
+        <span><a href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener">Raven en GitHub</a></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/search-index.js"></script>
+<script src="assets/js/api-index.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

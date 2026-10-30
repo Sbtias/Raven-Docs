@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Guía — Raven Docs</title>
+<meta name="description" content="Instalación de Raven, primera ventana, bucle de frames, layout, ventanas nativas, eventos, memoria, hilos, animaciones, diálogos y viewports.">
+<link rel="icon" type="image/png" href="assets/img/logo-white.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('raven-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
+</head>
+<body data-page="guia.html">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Abrir el menú">&equiv;</button>
+  <a class="brand" href="index.html"><img src="assets/img/logo-white.png" alt=""><span>Raven <b>Docs</b></span><span class="ver">v0.1.3</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="search-btn" id="search-open" aria-label="Buscar en la documentación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span class="label">Buscar...</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="icon-btn" id="theme-toggle" aria-label="Cambiar de tema">&#9788;</button>
+  <a class="ghbtn" href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener" aria-label="Raven en GitHub">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+    <span class="label">GitHub</span>
+  </a>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"><div id="sidebar-nav"></div></aside>
+  <main id="main">
+    <div class="content">
+
+      <div class="page-head">
+        <span class="eyebrow">Guía</span>
+        <h1>De cero a una ventana que funciona</h1>
+        <p>Todo lo que necesitas para compilar, arrancar y estructurar una aplicación con Raven. Si vienes del paquete precompilado, empieza por la instalación; si ya lo tienes enlazado, salta directo al bucle y al layout.</p>
+      </div>
+
+      <div class="toc">
+        <h4>En esta página</h4>
+        <ol>
+          <li><a href="#instalacion">Instalación</a></li>
+          <li><a href="#primera-ventana">Tu primera ventana</a></li>
+          <li><a href="#bucle">El bucle de frames</a></li>
+          <li><a href="#conceptos">Handles, errores y nombres</a></li>
+          <li><a href="#layout">Layout y slots</a></li>
+          <li><a href="#ventanas">Ventanas</a></li>
+          <li><a href="#eventos">Eventos y acciones</a></li>
+          <li><a href="#memoria">Memoria e hilos</a></li>
+          <li><a href="#animaciones">Animaciones</a></li>
+          <li><a href="#dialogos">Diálogos y archivos</a></li>
+          <li><a href="#viewports">Viewports</a></li>
+          <li><a href="#rendimiento">Rendimiento</a></li>
+          <li><a href="#problemas">Problemas frecuentes</a></li>
+        </ol>
+      </div>
+
+      <h2 id="instalacion">Instalación</h2>
+      <p>Raven se distribuye como un <strong>paquete CMake</strong>. En Windows conviven cuatro variantes: Visual C++ y MinGW-w64, cada una estática y compartida. Las bibliotecas de un compilador no sirven para el otro. Este paquete es <strong>MinGW-w64 x64, estático</strong>.</p>
+
+      <h3>Qué hay dentro del paquete</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Ruta</th><th>Qué es</th></tr></thead>
+          <tbody>
+            <tr><td><code>include/Raven.h</code></td><td>La API pública completa en un solo include.</td></tr>
+            <tr><td><code>include/raven/</code></td><td>Un header por área: core, window, widget, layout, controls, tools, xml...</td></tr>
+            <tr><td><code>lib/libraven.a</code></td><td>La librería estática para MinGW-w64 x64.</td></tr>
+            <tr><td><code>lib/cmake/raven/</code></td><td>El paquete CMake: <code>find_package(raven)</code> y <code>raven::raven</code>.</td></tr>
+            <tr><td><code>bin/ravenc.exe</code></td><td>El compilador de XMLC: convierte un <code>.xmlc</code>, <code>.xmlrs</code>, <code>.xmlpy</code>... en código del lenguaje.</td></tr>
+            <tr><td><code>bin/raven_designer.exe</code></td><td>El IDE oficial: proyectos, editor visual, XML, traducciones, build y run.</td></tr>
+            <tr><td><code>share/raven/</code></td><td>README, documentación, bindings y licencias de terceros.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">&#9888;</div>
+        <p><strong>Usa MinGW-w64, no Visual C++</strong>, para este paquete concreto. Si compilas con MSVC necesitas la variante <code>msvc-static</code> o <code>msvc-shared</code>. La DLL compartida, en cambio, puede cargarla cualquier lenguaje.</p>
+      </div>
+
+      <h3>Requisitos</h3>
+      <ul>
+        <li>Windows 10 u 11 de 64 bits.</li>
+        <li>Un compilador de MinGW-w64 (GCC) y CMake 3.16 o posterior. Ninja es opcional pero recomendable.</li>
+        <li>Un driver Vulkan instalado (viene con los drivers de GPU de NVIDIA, AMD e Intel). El <em>header</em> de Vulkan solo hace falta para compilar Raven desde el código fuente, no para usar este paquete.</li>
+      </ul>
+
+      <h3>Con CMake (recomendado)</h3>
+      <p>Crea un <code>CMakeLists.txt</code> que apunte a la carpeta del paquete con <code>CMAKE_PREFIX_PATH</code>:</p>
+      <div class="code" data-lang="cmake">
+<pre><code class="language-cmake">cmake_minimum_required(VERSION 3.16)
+project(mi_app C)
+
+set(CMAKE_PREFIX_PATH "C:/Users/tu_usuario/Downloads/raven-windows-mingw-x64-static")
+find_package(raven REQUIRED)
+
+add_executable(mi_app main.c)
+target_link_libraries(mi_app PRIVATE raven::raven)</code></pre>
+      </div>
+      <p>Configura con el generador de MinGW y compila:</p>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+./build/mi_app.exe</code></pre>
+      </div>
+      <p>Si CMake no encuentra el paquete, pásale la ruta en la línea de comandos en vez de dentro del archivo:</p>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release \
+  -DCMAKE_PREFIX_PATH="C:/ruta/a/raven-windows-mingw-x64-static"</code></pre>
+      </div>
+
+      <h3>Con gcc a mano</h3>
+      <p>La librería estática necesita además las bibliotecas del sistema de Windows. Esta línea funciona con el paquete y un GCC de MinGW-w64:</p>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">gcc main.c -I"raven/include" -L"raven/lib" -lraven \
+  -lwinhttp -lgdi32 -luser32 -lole32 -loleaut32 -luuid -lshell32 \
+  -lcomdlg32 -ldwmapi -lshcore -ladvapi32 -lcomctl32 -lws2_32 -lshlwapi \
+  -o mi_app.exe</code></pre>
+      </div>
+      <p>Añade <code>-mwindows</code> si no quieres la consola detrás de la ventana. Para depurar, compila con <code>-g</code> y sin <code>-mwindows</code>.</p>
+
+      <h3>Compilar Raven desde el código fuente</h3>
+      <p>Si en lugar de usar el paquete quieres construir la librería, necesitas CMake, un compilador C11 y los headers de Vulkan (se descargan solos si no hay SDK). En MSYS2 MINGW64:</p>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">pacman -S --needed git mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+git clone https://github.com/oscar-soirey/Raven.git
+cd Raven
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
+cmake --install build --prefix install</code></pre>
+      </div>
+      <p>En Visual Studio 2022, abre <em>Developer PowerShell for VS 2022</em> y ejecuta <code>cmake -S . -B build</code>, <code>cmake --build build --config Release --parallel</code> y <code>cmake --install build --config Release --prefix install</code>. Los programas quedan en <code>build\bin\Release</code>.</p>
+
+      <h3>Opciones de compilación más útiles</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Opción</th><th>Por defecto</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>RAVEN_BUILD_SHARED</code></td><td>OFF</td><td>Genera DLL / <code>.so</code> / <code>.dylib</code> en vez de librería estática.</td></tr>
+            <tr><td><code>RAVEN_BUILD_EXAMPLES</code></td><td>ON en el nivel superior</td><td>Compila los dieciséis ejemplos.</td></tr>
+            <tr><td><code>RAVEN_BUILD_TESTS</code></td><td>ON en el nivel superior</td><td>Tests headless, tests de bindings y benchmark.</td></tr>
+            <tr><td><code>RAVEN_BUILD_TOOLS</code></td><td>ON en el nivel superior</td><td>Compila <code>raven_designer</code>.</td></tr>
+            <tr><td><code>RAVEN_BUILD_WEB</code></td><td>ON</td><td>Incluye <code>raven_web</code> en la librería.</td></tr>
+            <tr><td><code>RAVEN_BACKEND_VULKAN</code></td><td>ON</td><td><code>OFF</code> compila sin GPU (backend propio o headless).</td></tr>
+            <tr><td><code>RAVEN_PLATFORM</code></td><td>auto</td><td><code>win32</code>, <code>x11</code>, <code>cocoa</code> o <code>null</code>.</td></tr>
+            <tr><td><code>RAVEN_WITH_STB_IMAGE</code></td><td>ON</td><td>Decodificación PNG, JPEG, BMP y TGA.</td></tr>
+            <tr><td><code>RAVEN_WARNINGS_AS_ERRORS</code></td><td>OFF</td><td>Convierte los warnings en errores.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="primera-ventana">Tu primera ventana</h2>
+      <p>El programa mínimo: iniciar, crear una ventana, darle contenido y esperar frames hasta que el usuario cierre.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">#include &lt;Raven.h&gt;
+
+static void on_quit(Rid sender, const char* action, void* user) {
+    (void)sender; (void)action; (void)user;
+    Rquit(0);
+}
+
+int main(void) {
+    if (!Rinit(R_BACKEND_VULKAN)) return 1;
+
+    Rid window = Rwindow_create("Mi primera app", 640, 400, R_WINDOW_DEFAULT);
+    Rid root = Rwidget_create(R_WIDGET_VBOX);
+    Rpanel_set_spacing(root, 10);
+    Rslot_set_padding(root, 20, 20, 20, 20);
+
+    Rid title = Rwidget_add_child(root, Rlabel_create("Hola, Raven"));
+    Rlabel_set_text_size(title, 22);
+
+    Rid input = Rwidget_add_child(root, Rtext_input_create());
+    Rtext_input_set_placeholder(input, "Escribe algo...");
+
+    Rid button = Rwidget_add_child(root, Rbutton_create("Salir"));
+    Rbutton_set_style(button, R_BUTTON_PRIMARY);
+    Rbutton_set_clicked_callback(button, on_quit, NULL);
+    Rslot_set_halign(button, R_HALIGN_LEFT);
+
+    Rwindow_set_content(window, root);
+    while (Rwait_frame(-1.0)) {}
+    Rshutdown();
+    return 0;
+}</code></pre>
+      </div>
+
+      <h3>La misma ventana en XML</h3>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window Title="Mi primera app" Width="640" Height="400"&gt;
+    &lt;VBox Spacing="10" Slot.Padding="20"&gt;
+        &lt;Label Text="Hola, Raven" TextSize="22"/&gt;
+        &lt;TextInput Name="entrada" Placeholder="Escribe algo..."/&gt;
+        &lt;Button Text="Salir" Style="Primary" OnClicked="app.quit" Slot.HAlign="Left"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid window = Rwindow_create_from_xml_file("mi_app.xml");
+Rid entrada = Rwidget_find(window, "entrada");   /* cualquier widget por Name */
+Raction_bind("app.quit", on_quit, NULL);          /* la acción del botón */</code></pre>
+      </div>
+
+      <div class="callout">
+        <div class="ci">&#128161;</div>
+        <p>El XML solo <em>construye</em> el árbol. Después, todo son handles normales: puedes buscar widgets con <code>Rwidget_find</code>, cambiarles propiedades o añadir hijos desde C en cualquier momento.</p>
+      </div>
+
+      <h2 id="bucle">El bucle de frames</h2>
+      <p>Raven no tiene bucle propio. Tú decides cuándo se produce un frame:</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">/* Un juego o un motor: nunca espera, un frame por vuelta. */
+while (Rdraw_frame()) {
+    actualizar_mi_escena();
+    renderizar_mi_escena();
+}
+
+/* Una herramienta: duerme hasta que pase algo. */
+while (Rwait_frame(-1.0)) {
+}
+
+return Rget_exit_code();</code></pre>
+      </div>
+      <ul>
+        <li><code>Rdraw_frame()</code> procesa eventos pendientes, timers y tareas, y luego mide, pinta y presenta solo las ventanas que cambiaron.</li>
+        <li><code>Rwait_frame(segundos)</code> hace lo mismo pero antes duerme hasta que haya un evento, un timer, una tarea o una animación en movimiento. Un valor negativo espera sin límite; <code>0</code> no duerme.</li>
+        <li>Ambos devuelven <code>R_FALSE</code> después de <code>Rquit()</code> o cuando se cierra la última ventana.</li>
+        <li>Una ventana sin cambios no se vuelve a dibujar: el coste en reposo es prácticamente cero.</li>
+      </ul>
+      <p>Si haces una operación larga y quieres que la interfaz siga respondiendo, llama a <code>Rpoll_events()</code> de vez en cuando, o mejor reparte el trabajo con <code>Rtask_run_async</code> / <code>Rparallel_for</code>.</p>
+
+      <h2 id="conceptos">Handles, errores y nombres</h2>
+      <h3>Todo es un <code>Rid</code></h3>
+      <p>Ventanas, widgets, fuentes, texturas, timers, documentos XML y nodos son handles opacos de 32 bits. Llevan un contador de generación, así que usar un objeto borrado se detecta y se reporta en vez de provocar un acceso inválido. <code>R_INVALID_ID</code> y <code>0</code> nunca son handles válidos.</p>
+      <p>Borrar un widget borra a sus hijos; borrar una ventana borra su contenido. Aun así, el patrón recomendado es dejar que el padre borre a sus hijos.</p>
+
+      <h3>Convención de nombres</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Forma</th><th>Ejemplo</th></tr></thead>
+          <tbody>
+            <tr><td><code>R&lt;objeto&gt;_&lt;acción&gt;</code></td><td><code>Rwindow_create</code>, <code>Rbutton_set_text</code>, <code>Rslot_set_fill</code></td></tr>
+            <tr><td><code>R&lt;acción&gt;</code></td><td><code>Rinit</code>, <code>Rdraw_frame</code>, <code>Rquit</code>, <code>Rshutdown</code></td></tr>
+            <tr><td><code>R&lt;Nombre&gt;</code></td><td><code>Rid</code>, <code>REvent</code>, <code>RInitDesc</code>, <code>RPainter</code></td></tr>
+            <tr><td><code>R_&lt;NOMBRE&gt;</code></td><td><code>R_WIDGET_VBOX</code>, <code>R_KEY_ESCAPE</code>, <code>R_THEME_GLASS_DARK</code></td></tr>
+            <tr><td><code>RAVEN_&lt;NOMBRE&gt;</code></td><td>Macros y opciones de compilación (<code>RAVEN_VERSION_MAJOR</code>)</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Los nombres que empiezan por <code>rvn_</code> o <code>RVN_</code> son internos y no se exportan.</p>
+
+      <h3>Errores</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void on_error(RError code, RSeverity severity, const char* detail) {
+    fprintf(stderr, "[Raven] %s: %s\n", Rerror_to_string(code), detail);
+}
+
+Rerror_set_callback(on_error);        /* antes o después de Rinit */
+
+/* O consulta el último error y límpialo: */
+const char* detail = NULL;
+RSeverity severity;
+RError error = Rerror_get_last(&detail, &severity);
+if (error != R_NO_ERROR) {
+    printf("%s: %s\n", Rerror_to_string(error), detail);
+}</code></pre>
+      </div>
+      <p>La macro <code>Rerror_check()</code> imprime el último error con archivo y línea. Los errores del renderer llegan desde el hilo de render, así que el callback debe ser seguro para llamarse desde varios hilos.</p>
+
+      <h3>Inicio con opciones</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RInitDesc desc = {0};
+desc.backend = R_BACKEND_VULKAN;   /* o R_BACKEND_NULL para tests */
+desc.app_name = "Mi editor";
+desc.worker_threads = 0;           /* 0: uno por núcleo libre; negativo: ninguno */
+desc.disable_vsync = 0;
+desc.enable_validation = 0;        /* capa de validación Vulkan, si está instalada */
+desc.headless = 0;                 /* 1: sin ventana del sistema */
+desc.ui_scale = 0;                 /* 0 = 1.0, encima de la escala del monitor */
+Rinit_ex(&desc);</code></pre>
+      </div>
+
+      <h2 id="layout">Layout y slots</h2>
+      <p>El layout es el de Slate, en dos pasadas: cada widget calcula el tamaño que le gustaría, de abajo arriba; después cada panel reparte rectángulos, de arriba abajo. La colocación de un hijo se guarda <strong>en el hijo</strong>, en su <em>slot</em>, y la lee su padre.</p>
+
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid fila = Rwidget_add_child(parent, Rwidget_create(R_WIDGET_HBOX));
+Rpanel_set_spacing(fila, 8);
+
+Rid nombre = Rwidget_add_child(fila, Rwidget_create(R_WIDGET_TEXT_INPUT));
+Rslot_set_fill(nombre, 1.0f);              /* ocupa el ancho libre */
+Rslot_set_padding(nombre, 0, 0, 8, 0);
+
+Rid ok = Rwidget_add_child(fila, Rbutton_create("OK"));
+Rslot_set_valign(ok, R_VALIGN_CENTER);     /* su altura, centrado */
+Rslot_set_padding(ok, 8, 0, 0, 0);</code></pre>
+      </div>
+
+      <h3>Atributos de slot</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Atributo</th><th>Valor</th><th>Lo usa</th></tr></thead>
+          <tbody>
+            <tr><td><code>Slot.Padding</code></td><td>margen alrededor del hijo</td><td>todos los paneles y el contenido de la ventana</td></tr>
+            <tr><td><code>Slot.HAlign</code></td><td><code>Fill</code>, <code>Left</code>, <code>Center</code>, <code>Right</code></td><td>VBox, Grid, Overlay, Border, SizeBox, ScrollBox, Switcher</td></tr>
+            <tr><td><code>Slot.VAlign</code></td><td><code>Fill</code>, <code>Top</code>, <code>Center</code>, <code>Bottom</code></td><td>HBox, Grid, Overlay, Border, SizeBox, ScrollBox, Switcher</td></tr>
+            <tr><td><code>Slot.Fill</code></td><td>número: parte del espacio libre (<code>1</code> = una parte)</td><td>VBox, HBox y tamaño de panel en Splitter</td></tr>
+            <tr><td><code>Slot.Auto</code></td><td><code>true</code>: vuelve al tamaño pedido</td><td>VBox, HBox</td></tr>
+            <tr><td><code>Slot.MaxSize</code></td><td>límite del hijo que rellena</td><td>VBox, HBox</td></tr>
+            <tr><td><code>Slot.Column</code>, <code>Slot.Row</code></td><td>celda, desde 0</td><td>Grid</td></tr>
+            <tr><td><code>Slot.ColumnSpan</code>, <code>Slot.RowSpan</code></td><td>celdas cubiertas (1 por defecto)</td><td>Grid</td></tr>
+            <tr><td><code>Slot.Anchors</code></td><td><code>x,y</code> o <code>minX,minY,maxX,maxY</code></td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Position</code></td><td><code>x,y</code> desde el ancla</td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Size</code></td><td><code>ancho,alto</code></td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Alignment</code></td><td>pivote <code>x,y</code>, 0..1</td><td>Canvas</td></tr>
+            <tr><td><code>Slot.Title</code></td><td>texto de la pestaña</td><td>TabView, DockArea</td></tr>
+            <tr><td><code>Slot.Dock</code></td><td><code>Left</code>, <code>Right</code>, <code>Top</code>, <code>Bottom</code>, <code>Tab</code></td><td>DockArea</td></tr>
+            <tr><td><code>Slot.DockTo</code></td><td>nombre del panel contra el que se coloca</td><td>DockArea</td></tr>
+            <tr><td><code>Slot.DockSize</code></td><td>parte del espacio que se corta, 0..1</td><td>DockArea</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <p>Los tamaños son unidades lógicas: se multiplican por la escala del monitor. Solo se vuelve a medir y colocar la parte del árbol que cambió.</p>
+
+      <div class="callout">
+        <div class="ci">&#128161;</div>
+        <p>Si un hijo no aparece, revisa dos cosas: que su padre sea un panel con layout (VBox, HBox, Grid...) y que el slot no lo esté dejando con tamaño cero. Para depurar, <code>Rwidget_get_rect()</code> y <code>Rwidget_get_desired_size()</code> te dicen el rectángulo real y el deseado.</p>
+      </div>
+
+      <h2 id="ventanas">Ventanas</h2>
+      <p>Una ventana se crea con un título, un tamaño de cliente y flags:</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid window = Rwindow_create("Editor", 1280, 800,
+    R_WINDOW_DEFAULT | R_WINDOW_CUSTOM_HEADER);
+
+Rwindow_set_min_size(window, 640, 400);
+Rwindow_center(window);
+Rwindow_set_close_callback(window, on_close, NULL);
+Rwindow_set_drop_callback(window, on_drop, NULL);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Flag</th><th>Efecto</th></tr></thead>
+          <tbody>
+            <tr><td><code>R_WINDOW_DEFAULT</code></td><td>Ventana normal, redimensionable, con título del sistema.</td></tr>
+            <tr><td><code>R_WINDOW_NO_RESIZE</code></td><td>Tamaño fijo.</td></tr>
+            <tr><td><code>R_WINDOW_HIDDEN</code></td><td>Empieza oculta; se muestra con <code>Rwindow_show</code>.</td></tr>
+            <tr><td><code>R_WINDOW_BORDERLESS</code></td><td>Sin borde del sistema.</td></tr>
+            <tr><td><code>R_WINDOW_MAXIMIZED</code></td><td>Empieza maximizada.</td></tr>
+            <tr><td><code>R_WINDOW_CUSTOM_HEADER</code></td><td>Quita la barra de título; un <code>HeaderBar</code> la sustituye.</td></tr>
+            <tr><td><code>R_WINDOW_TRANSPARENT</code></td><td>Lo que no se dibuja deja ver el escritorio (necesita compositor).</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Header bar personalizada</h3>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window Title="Herramienta" CustomHeader="true"&gt;
+    &lt;VBox&gt;
+        &lt;HeaderBar&gt;
+            &lt;MenuBar&gt;
+                &lt;Menu Text="Archivo"&gt;
+                    &lt;MenuItem Text="Abrir" Shortcut="Ctrl+O" OnClicked="file.open"/&gt;
+                    &lt;MenuItem Text="Guardar" Shortcut="Ctrl+S" OnClicked="file.save"/&gt;
+                &lt;/Menu&gt;
+            &lt;/MenuBar&gt;
+            &lt;Button Text="Ejecutar" Slot.HAlign="Right"/&gt;
+        &lt;/HeaderBar&gt;
+        &lt;!-- contenido --&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+      <p>La <code>HeaderBar</code> dibuja el título y los botones de la ventana, y puede contener cualquier widget. Arrastrarla mueve la ventana, doble clic la maximiza y los bordes siguen redimensionando. En Windows se usa el <em>hit test</em> del sistema, así que el snapping a los lados sigue funcionando. Cualquier widget puede arrastrar la ventana con <code>Rwidget_set_window_drag(widget, R_TRUE)</code>.</p>
+
+      <h3>Transparencia, blur y opacidad</h3>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window Transparent="true" Backdrop="Blur" Borderless="true"&gt;
+    &lt;BackgroundBlur Style="Native" CornerRadius="24" Padding="22" Tint="#10141C99"&gt;
+        &lt;!-- contenido --&gt;
+    &lt;/BackgroundBlur&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+      <p><code>Backdrop</code> puede ser <code>Transparent</code>, <code>Blur</code>, <code>Acrylic</code>, <code>Mica</code> (Windows 11) o <code>None</code>. La disponibilidad depende del sistema y del compositor; <code>Rwindow_get_backdrop()</code> dice qué se obtuvo realmente. <code>Rwindow_set_opacity()</code> funde la ventana entera.</p>
+
+      <h3>Otras operaciones</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rwindow_show(window);
+Rwindow_hide(window);
+Rwindow_maximize(window);
+Rwindow_minimize(window);
+Rwindow_restore(window);
+Rwindow_set_topmost(window, R_TRUE);
+Rwindow_set_icon(window, rgba_pixels, 32, 32);
+Rwindow_set_background(window, texture);
+Rwindow_request_redraw(window);
+
+uint8_t* pixels = Rwindow_capture(window, &amp;width, &amp;height);  /* RGBA, liberar con Rpixels_free */</code></pre>
+      </div>
+
+      <h2 id="eventos">Eventos y acciones</h2>
+      <p>Raven tiene dos formas de conectar la interfaz con tu código: <strong>acciones por nombre</strong> (cómodas desde XML y scripts) y <strong>callbacks directos</strong> (cómodos desde C).</p>
+
+      <h3>Acciones</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void on_save(Rid sender, const char* action, void* user) {
+    printf("guardar desde %s\n", action);
+}
+
+Raction_bind("file.save", on_save, NULL);
+Raction_fire("file.save", R_INVALID_ID);       /* dispara como un widget */
+
+/* Recibe toda acción sin binding, por ejemplo un puente de scripts. */
+Raction_set_default_handler(on_any_action, NULL);</code></pre>
+      </div>
+      <p>En XML, <code>OnClicked</code>, <code>OnChanged</code>, <code>OnCommitted</code> y <code>OnActivated</code> son sinónimos del <em>action</em> principal del widget. Se resuelven al disparar, así que puedes enlazarlas antes o después de crear la interfaz.</p>
+
+      <h3>Callbacks</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rbutton_set_clicked_callback(button, on_click, user);
+Rtext_input_set_changed_callback(input, on_text, user);
+Rlist_view_set_selection_changed_callback(list, on_selection, user);
+Rwidget_set_event_callback(widget, on_raw_event, user);   /* ratón, teclado, foco... */
+Rwindow_set_resize_callback(window, on_resize, user);
+Rwindow_set_close_callback(window, on_close, user);</code></pre>
+      </div>
+
+      <h3>Atajos de teclado</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rwindow_register_shortcut(window, R_KEY_S, R_MOD_CTRL, "file.save");
+Rwindow_unregister_shortcut(window, R_KEY_S, R_MOD_CTRL);</code></pre>
+      </div>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Shortcut Keys="Ctrl+S" Action="file.save"/&gt;
+&lt;MenuItem Text="Guardar" Shortcut="Ctrl+S" OnClicked="file.save"/&gt;</code></pre>
+      </div>
+
+      <h3>Drag and drop de entrada</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static int on_drop(Rid target, const RDropEvent* event, void* user) {
+    if (event->phase == R_DROP_DROPPED &amp;&amp; event->path_count &gt; 0) {
+        abrir_archivo(event->paths[0]);
+    }
+    return R_TRUE;   /* "lo acepto": el objetivo se resalta mientras el cursor encima */
+}
+
+Rwindow_set_drop_callback(window, on_drop, NULL);
+Rwidget_set_drop_callback(panel, on_drop, NULL);</code></pre>
+      </div>
+      <p>Se reciben archivos y texto arrastrados desde otras aplicaciones. Arrastrar <em>desde</em> una ventana de Raven hacia otra aplicación todavía no está implementado, aunque sí existe <code>Rdrag_begin</code> para arrastres internos (por ejemplo, pestañas o tiles).</p>
+
+      <h2 id="memoria">Memoria e hilos</h2>
+      <h3>El asignador</h3>
+      <p>Raven no llama a <code>malloc</code>. Toma memoria del sistema en regiones de 4 MB y la reparte con su propio heap TLSF: asignación y liberación en tiempo constante, vecinos libres fusionados. Las fuentes y decodificadores incluidos también lo usan.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RAllocator mio = { mi_alloc, mi_realloc, mi_free, mi_datos };
+Rset_allocator(&amp;mio);          /* antes de Rinit */
+
+RMemoryStats stats;
+Rmemory_get_stats(&amp;stats);
+printf("en uso: %zu, pico: %zu, bloques: %zu\n",
+       stats.used_bytes, stats.peak_bytes, stats.allocation_count);
+
+Rmemory_check();               /* verifica la estructura del heap */
+Rmemory_trim();                /* devuelve al SO las regiones vacías */</code></pre>
+      </div>
+      <p>Para que Valgrind o un profiler de heap vean los bloques, usa <code>Rset_allocator(Rallocator_get_system())</code> o define <code>RAVEN_ALLOCATOR=system</code>. También es el modo por defecto en builds con AddressSanitizer.</p>
+
+      <h3>Hilos</h3>
+      <ul>
+        <li>El hilo que llama a <code>Rinit</code> es el <strong>hilo de interfaz</strong>. Todas las funciones se llaman desde ahí salvo las documentadas como thread-safe.</li>
+        <li>Desde otro hilo, cambia la UI con <code>Rtask_post(función, datos)</code>: se ejecuta en el hilo de UI en el siguiente frame.</li>
+        <li><code>Rtask_run_async</code> y <code>Rparallel_for</code> reparten trabajo entre los hilos del job system.</li>
+        <li><code>Rtexture_create_from_file_async</code> decodifica en segundo plano; los widgets que usan la textura se actualizan cuando está lista.</li>
+        <li>Los callbacks de dibujo de un <code>Viewport</code> corren en el <strong>hilo de render</strong>.</li>
+        <li>Son thread-safe: <code>Rtask_post</code>, <code>Rtask_run_async</code>, <code>Rwake_up</code>, <code>Rquit</code>, <code>Rwindow_request_redraw</code>, <code>Rget_time</code> y <code>Rmemory_*</code>.</li>
+      </ul>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void aplicar_resultado(void* data) {
+    Resultado* r = (Resultado*)data;
+    Rlabel_set_text(label, r-&gt;texto);      /* ya estamos en el hilo de UI */
+    free(r);
+}
+
+/* desde un hilo de trabajo */
+Rtask_post(aplicar_resultado, resultado);</code></pre>
+      </div>
+
+      <h2 id="animaciones">Animaciones</h2>
+      <p>Los controles se mueven solos con springs: los botones se aplastan al pulsarlos y rebotan, los switches se deslizan, los popups salen de lo que los abrió y las listas se estiran en los extremos. Tú solo decides las transiciones y los ajustes globales.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rwidget_set_transition(card, R_TRANSITION_FLY_UP, 0.1f);  /* cada vez que aparece */
+Rwidget_play_transition(card, R_TRANSITION_DROP, 0.0f);   /* una vez, ahora */
+
+Rset_animation_speed(0.25f);          /* cámara lenta */
+Rset_animations_enabled(R_FALSE);     /* "reduce motion" */
+Rset_animation_time_step(1.0 / 60);   /* frames deterministas, para vídeo o tests */</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Transiciones</th><th>Motion de los springs</th></tr></thead>
+          <tbody>
+            <tr><td><code>Fade</code>, <code>Pop</code>, <code>Zoom</code>, <code>FlyUp</code>, <code>FlyDown</code>, <code>FlyLeft</code>, <code>FlyRight</code>, <code>Drop</code>, <code>SlideLeft</code>, <code>SlideRight</code></td><td><code>R_MOTION_SNAPPY</code>, <code>R_MOTION_SMOOTH</code>, <code>R_MOTION_BOUNCY</code>, <code>R_MOTION_WOBBLY</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>En un widget personalizado, dentro del callback de pintado, puedes animar un valor con <code>Rdraw_spring(painter, &amp;estado, objetivo, R_MOTION_BOUNCY)</code>. Mientras algo se mueve, la ventana sigue pidiendo frames; cuando todo está quieto, <code>Rwait_frame</code> vuelve a dormir.</p>
+
+      <h2 id="dialogos">Diálogos y archivos</h2>
+      <h3>Diálogos del sistema</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RFileFilter filtros[] = {
+    { "Imágenes", "*.png;*.jpg;*.jpeg" },
+    { "Todos los archivos", "*.*" }
+};
+
+RFileDialogDesc desc = {0};
+desc.parent = window;
+desc.title = "Abrir imagen";
+desc.filters = filtros;
+desc.filter_count = 2;
+
+const char* ruta = Rfile_dialog_open(&amp;desc);
+if (ruta) {
+    Rid texture = Rtexture_create_from_file(ruta);
+    /* ... */
+}
+
+/* Guardar, o elegir carpeta */
+const char* destino = Rfile_dialog_save(&amp;desc);
+const char* carpeta = Rfile_dialog_select_folder(&amp;desc);</code></pre>
+      </div>
+      <p>En Windows se usan los diálogos comunes; en Linux, <code>zenity</code> o <code>kdialog</code> si están instalados. Si no hay diálogo del sistema, Raven usa el suyo, construido sobre el widget <code>FileBrowser</code>, que también puedes incrustar en cualquier ventana.</p>
+
+      <h3>Message boxes</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">if (Rmessage_box(window, "Salir", "¿Descartar los cambios?",
+                 R_MESSAGE_OK_CANCEL) == R_MESSAGE_RESULT_OK) {
+    Rquit(0);
+}</code></pre>
+      </div>
+
+      <h3>Diálogos propios</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid contenido = Rwidget_create_from_xml(xml, strlen(xml));
+Rdialog_open(window, contenido, on_closed, NULL);   /* no bloquea */
+int resultado = Rdialog_run(window, contenido);      /* modal, devuelve el resultado */
+Rdialog_close(contenido, 1);</code></pre>
+      </div>
+
+      <h3>Lectura y escritura</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">size_t size = 0;
+char* texto = Rfile_read("notas.txt", &amp;size);   /* ruta UTF-8, cualquier plataforma */
+if (texto) {
+    Rfile_write("copia.txt", texto, size);
+    Rmemory_free(texto);
+}</code></pre>
+      </div>
+
+      <h2 id="viewports">Viewports</h2>
+      <p>Un <code>Viewport</code> es el puente entre Raven y tu propio contenido renderizado. Hay tres modos:</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">/* 1. Textura: cualquier imagen, mostrada como un widget (recortada, UI encima). */
+Rviewport_set_texture(viewport, texture);
+/*    Vulkan sin copia:  Rvulkan_texture_create_from_image_view(view, 0, w, h)
+      OpenGL sin copia:  Rvulkan_texture_create_shared + GL_EXT_memory_object
+      Cualquier API:      Rtexture_update(texture, rgba, w, h)                  */
+
+/* 2. Callback de dibujo: tus llamadas Vulkan dentro del render pass de Raven. */
+Rviewport_set_draw_callback(viewport, on_draw, user);
+
+/* 3. Ventana hija nativa: un HWND / X11 Window para OpenGL, Direct3D, etc. */
+Rviewport_set_native(viewport, R_TRUE);
+RNativeWindow native;
+Rviewport_get_native_handle(viewport, &amp;native);</code></pre>
+      </div>
+      <p>Para renderizar la UI con el dispositivo de un motor en vez de uno creado por Raven, llama a <code>Rvulkan_set_external_device()</code> y <code>Rvulkan_set_queue_lock_callbacks()</code> antes de <code>Rinit</code>. Está documentado en <code>raven_vulkan.h</code>.</p>
+
+      <h2 id="rendimiento">Rendimiento</h2>
+      <p>El benchmark incluido (<code>raven_benchmark</code>, compilado con los tests) mide un árbol grande sin GPU. En la máquina de 2 núcleos usada para el desarrollo, build release:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>12 000 widgets, 27 800 primitivas</th><th>Tiempo</th></tr></thead>
+          <tbody>
+            <tr><td>Primer layout</td><td>2 a 3 ms</td></tr>
+            <tr><td>Repintado completo</td><td>1,3 a 2,3 ms, una draw call</td></tr>
+            <tr><td>Layout tras cambiar una etiqueta</td><td>0,03 a 0,05 ms</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Mide en tu máquina con <code>raven_benchmark 160 0</code> y <code>raven_benchmark 160 -1</code>. Para ver el coste real por frame, lee <code>RFrameStats</code>:</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RFrameStats stats;
+Rwindow_get_frame_stats(window, &amp;stats);
+printf("layout %.2f ms, paint %.2f ms, render %.2f ms, %u widgets, %u draw calls\n",
+       stats.layout_ms, stats.paint_ms, stats.render_ms,
+       stats.widget_count, stats.draw_call_count);</code></pre>
+      </div>
+      <p>El glass tiene un coste mayor: un frame con cristal se dibuja primero en una imagen offscreen y se copia/difumina donde empieza el cristal. Un frame sin glass va directo a la ventana. <code>stats.backdrop_count</code> te dice cuántas veces se copió y difuminó en el último frame.</p>
+
+      <h2 id="problemas">Problemas frecuentes</h2>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Síntoma</th><th>Causa probable y solución</th></tr></thead>
+          <tbody>
+            <tr><td>La ventana no aparece o se cierra sola</td><td>No hay driver Vulkan, o el backend falló. Registra <code>Rerror_set_callback</code> y comprueba que <code>Rinit</code> devolvió <code>R_TRUE</code>. Prueba <code>R_BACKEND_NULL</code> para aislar.</td></tr>
+            <tr><td><code>undefined reference to ...</code> al enlazar</td><td>Faltan bibliotecas del sistema de Windows. Usa el comando de gcc de esta guía o enlaza con CMake.</td></tr>
+            <tr><td><code>raven.dll</code> no se encuentra</td><td>Este paquete es estático. Si usas una variante compartida, copia la DLL junto al .exe o añade su carpeta al <code>PATH</code>.</td></tr>
+            <tr><td>CMake no encuentra <code>raven</code></td><td>Pasa <code>-DCMAKE_PREFIX_PATH=...</code> apuntando a la carpeta que contiene <code>lib/cmake/raven</code>.</td></tr>
+            <tr><td>Errores raros de ABI o crashes al enlazar</td><td>Estás mezclando MSVC con MinGW. Usa la variante del paquete correspondiente a tu compilador.</td></tr>
+            <tr><td>El XML no se recarga al guardar</td><td>Comprueba <code>Rxml_get_live_reload()</code> y que no esté definido <code>RAVEN_LIVE_RELOAD=0</code>. Los documentos creados desde texto no se vigilan, solo los archivos.</td></tr>
+            <tr><td>Texto invisible o glifos raros</td><td>La fuente incluida cubre Latin-1 y Latin Extended-A. Para otros scripts, Raven pide una fuente del sistema; si falta, configura una con <code>Rfont_set_fallback</code>.</td></tr>
+            <tr><td>El web view no muestra nada</td><td><code>Rweb_is_available()</code> devuelve si hay un navegador Chromium instalado. Sin navegador, el widget muestra un aviso. Prueba <code>RAVEN_WEB_TRACE=1</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pager">
+        <a href="index.html"><span>Anterior</span>&larr; Introducción</a>
+        <a class="next" href="xml.html"><span>Siguiente</span>XML y XMLC &rarr;</a>
+      </div>
+
+      <div class="footer">
+        <span>Raven Docs &middot; Guía</span>
+        <span><a href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener">Raven en GitHub</a></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/search-index.js"></script>
+<script src="assets/js/api-index.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

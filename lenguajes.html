@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Otros lenguajes, IDE y ejemplos — Raven Docs</title>
+<meta name="description" content="Bindings de Raven para C++, Python, Rust, Go, C#, Zig y LuaJIT, el IDE raven_designer, XMLC en cada lenguaje, los ejemplos y las preguntas frecuentes.">
+<link rel="icon" type="image/png" href="assets/img/logo-white.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('raven-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
+</head>
+<body data-page="lenguajes.html">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Abrir el menú">&equiv;</button>
+  <a class="brand" href="index.html"><img src="assets/img/logo-white.png" alt=""><span>Raven <b>Docs</b></span><span class="ver">v0.1.3</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="search-btn" id="search-open" aria-label="Buscar en la documentación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span class="label">Buscar...</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="icon-btn" id="theme-toggle" aria-label="Cambiar de tema">&#9788;</button>
+  <a class="ghbtn" href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener" aria-label="Raven en GitHub">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+    <span class="label">GitHub</span>
+  </a>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"><div id="sidebar-nav"></div></aside>
+  <main id="main">
+    <div class="content">
+
+      <div class="page-head">
+        <span class="eyebrow">Ecosistema</span>
+        <h1>Raven desde cualquier lenguaje</h1>
+        <p>Raven es una librería C, así que cualquier lenguaje que pueda llamar a C puede usarla. El proyecto incluye bindings generados desde los headers para C++, Python, Rust, Go, C#, Zig y LuaJIT, además de un IDE y una forma de compilar la interfaz y el código en un solo archivo.</p>
+      </div>
+
+      <div class="toc">
+        <h4>En esta página</h4>
+        <ol>
+          <li><a href="#cpp">C++</a></li>
+          <li><a href="#python">Python</a></li>
+          <li><a href="#rust">Rust</a></li>
+          <li><a href="#otros">Go, C#, Zig y LuaJIT</a></li>
+          <li><a href="#xmlc">XMLC en cada lenguaje</a></li>
+          <li><a href="#ide">El IDE</a></li>
+          <li><a href="#ejemplos">Los ejemplos</a></li>
+          <li><a href="#faq">Preguntas frecuentes</a></li>
+        </ol>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">&#9888;</div>
+        <p><strong>Antes de elegir el lenguaje:</strong> este paquete precompilado para Windows contiene <code>lib/libraven.a</code>, una librería <strong>estática para MinGW-w64 x64</strong>. C++ y Zig pueden enlazarla directamente. Python (ctypes), C# (P/Invoke) y LuaJIT (FFI) necesitan una <strong>DLL</strong>; Go y Rust pueden usar la estática, pero sus plantillas suelen esperar la compartida. Si vas a usar esos lenguajes, compila Raven desde el código fuente con <code>-DRAVEN_BUILD_SHARED=ON</code> o consigue un paquete compartido de la misma versión.</p>
+      </div>
+
+      <h2 id="cpp">C++</h2>
+      <p>El binding de C++ es un solo header, <code>raven.hpp</code>. Da una clase por tipo de handle (<code>Window</code>, <code>Button</code>, <code>XmlNode</code>…), acepta lambdas donde C pide un callback y añade un <code>Painter</code> para dibujar. Usa los headers de C y enlaza como un programa C, con la librería estática o compartida.</p>
+
+      <h3>Compilar con CMake</h3>
+      <p>Es la vía recomendada con este paquete. CMake ya conoce las librerías del sistema que necesita Raven en Windows.</p>
+      <div class="code" data-lang="cmake">
+<pre><code class="language-cmake">cmake_minimum_required(VERSION 3.16)
+project(mi_app CXX)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_PREFIX_PATH "C:/ruta/a/raven-windows-mingw-x64-static")
+
+find_package(raven REQUIRED)
+
+add_executable(mi_app main.cpp)
+target_include_directories(mi_app PRIVATE
+    "${CMAKE_PREFIX_PATH}/share/raven/bindings/cpp")
+target_link_libraries(mi_app PRIVATE raven::raven)</code></pre>
+      </div>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">cmake -S . -B build -G "MinGW Makefiles"
+cmake --build build
+./build/mi_app.exe</code></pre>
+      </div>
+
+      <h3>Compilar a mano con MinGW</h3>
+      <p>Si no usas CMake, además de <code>libraven.a</code> hay que enlazar las bibliotecas del sistema que usa la librería. Esta es la lista que necesita el paquete de Windows:</p>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">g++ -std=c++17 main.cpp ^
+    -I"raven/include" -I"raven/share/raven/bindings/cpp" ^
+    -L"raven/lib" -lraven ^
+    -lwinhttp -lgdi32 -luser32 -lole32 -loleaut32 -luuid -lshell32 ^
+    -lcomdlg32 -ldwmapi -lshcore -ladvapi32 -lcomctl32 -lws2_32 -lshlwapi ^
+    -o mi_app.exe</code></pre>
+      </div>
+      <p class="small muted">El símbolo <code>^</code> continúa la línea en <code>cmd.exe</code>. En PowerShell, usa una sola línea o el acento grave (<code>`</code>) al final.</p>
+
+      <h3>Una ventana en C++</h3>
+      <div class="code" data-lang="cpp">
+<pre><code class="language-cpp">#include &lt;raven.hpp&gt;
+
+int main() {
+    if (!raven::init(R_BACKEND_VULKAN)) {
+        return 1;
+    }
+
+    auto window = raven::Window::create("Hola desde C++", 380, 220, R_WINDOW_DEFAULT);
+    auto box    = raven::Panel(raven::Widget::create(R_WIDGET_VBOX));
+    auto title  = raven::Label::create("Raven + C++");
+    auto button = raven::Button::create("Salir");
+
+    box.set_spacing(12.0f);
+    box.slot_set_padding(20.0f, 20.0f, 20.0f, 20.0f);
+
+    button.set_style(R_BUTTON_PRIMARY);
+    button.set_clicked_callback([](Rid) { raven::quit(0); });
+
+    box.add_child(title);
+    box.add_child(button);
+    window.set_content(box);
+
+    while (raven::wait_frame(-1.0)) {}
+    raven::shutdown();
+    return 0;
+}</code></pre>
+      </div>
+      <p>Las lambdas con capturas se guardan y se liberan al reemplazar el callback, como en el ejemplo oficial del binding. Las acciones por nombre funcionan igual: <code>raven::action_bind("quit", [](Rid, const char*) { raven::quit(0); });</code>.</p>
+
+      <h2 id="python">Python</h2>
+      <p>El binding de Python es un módulo único, <code>raven.py</code>, basado en <code>ctypes</code> y sin dependencias. Los textos son <code>str</code>, los callbacks son funciones de Python y los valores que C devuelve por puntero se convierten en tuplas o resultados.</p>
+
+      <h3>Instalar</h3>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash"># desde el registro, con la librería incluida
+pip install raven-gui
+
+# o con el binding del paquete y una raven.dll aparte
+set RAVEN_LIBRARY=C:\ruta\a\raven.dll
+python ejemplo.py</code></pre>
+      </div>
+      <p>También puedes poner <code>raven.dll</code> junto a <code>raven.py</code>. Si usas el paquete estático de esta carpeta, antes necesitas compilar la variante compartida desde el código fuente.</p>
+
+      <h3>Una ventana en Python</h3>
+      <div class="code" data-lang="python">
+<pre><code class="language-python">import raven as r
+
+XML = """
+&lt;Window Title="Hola desde Python" Width="380" Height="220"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="20"&gt;
+        &lt;Label Name="title" Text="Raven + Python" TextSize="20"/&gt;
+        &lt;Button Text="Salir" Style="Primary" OnClicked="quit"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;
+"""
+
+if not r.Rinit(r.R_BACKEND_VULKAN):
+    raise SystemExit("no se pudo iniciar Raven")
+
+window = r.Rwindow_create_from_xml(XML)
+r.Raction_bind("quit", lambda sender, action, user: r.Rquit(0))
+
+while r.Rwait_frame(-1.0):
+    pass
+
+r.Rshutdown()</code></pre>
+      </div>
+      <p>Para leer un campo: <code>r.Rtext_input_get_text(r.Rwidget_find(window, "nombre"))</code>. Para cambiar una etiqueta: <code>r.Rlabel_set_text(widget, "Hola")</code>. Los errores de llamada llegan al callback de <code>r.Rerror_set_callback</code> con su código y su detalle.</p>
+
+      <h2 id="rust">Rust</h2>
+      <p>El binding de Rust es un crate: <code>raven::sys</code> expone la API de C y el crate añade ayudas para <code>&amp;str</code>, <code>CString</code>, acciones y textos. Se puede enlazar la librería compartida (por defecto) o la estática con <code>RAVEN_STATIC=1</code>.</p>
+
+      <h3>Configurar</h3>
+      <div class="code" data-lang="toml">
+<pre><code class="language-toml">[dependencies]
+raven = { package = "raven-gui", path = "../raven/share/raven/bindings/rust" }
+# o, desde el registro:
+# raven-gui = "0.1"</code></pre>
+      </div>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">set RAVEN_LIB_DIR=C:\ruta\a\raven\lib
+cargo run
+
+# enlazar libraven.a en lugar de la DLL
+set RAVEN_STATIC=1
+cargo run</code></pre>
+      </div>
+
+      <h3>Una ventana en Rust</h3>
+      <div class="code" data-lang="rust">
+<pre><code class="language-rust">use raven::*;
+
+const XML: &amp;str = r#"
+&lt;Window Title="Hola desde Rust" Width="380" Height="220"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="20"&gt;
+        &lt;Label Text="Raven + Rust" TextSize="20"/&gt;
+        &lt;Button Text="Salir" Style="Primary" OnClicked="quit"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;"#;
+
+fn main() {
+    unsafe {
+        if Rinit(R_BACKEND_VULKAN) == 0 {
+            eprintln!("no se pudo iniciar Raven");
+            return;
+        }
+
+        let _window = window_from_xml(XML);
+        action_bind("quit", |_, _| Rquit(0));
+
+        while Rwait_frame(-1.0) != 0 {}
+        Rshutdown();
+    }
+}</code></pre>
+      </div>
+      <p>El crate incluye <code>text()</code> y <code>cstr()</code> para convertir entre <code>CStr</code> y <code>&amp;str</code>, y <code>action_bind</code> acepta closures. Para pasar textos a la API usa <code>cstr("...").as_ptr()</code>.</p>
+
+      <h2 id="otros">Go, C#, Zig y LuaJIT</h2>
+      <p>Los cuatro bindings se generan con el mismo script y cubren la misma API pública, con los nombres de C. La diferencia está en el sistema de tipos y en cómo se registran los callbacks.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Lenguaje</th><th>Archivo</th><th>Cómo se usa</th></tr></thead>
+          <tbody>
+            <tr><td>Go</td><td><code>go/</code></td><td>Paquete cgo. Exporta funciones con tipos Go y <code>ActionBind</code>, <code>ErrorSetCallback</code>, <code>TimerStart</code> para callbacks.</td></tr>
+            <tr><td>C#</td><td><code>csharp/Raven.cs</code></td><td>P/Invoke: <code>Raven.R.Rwindow_create(...)</code>, delegados y estructuras. Añade el archivo al proyecto y pon la DLL junto al ejecutable.</td></tr>
+            <tr><td>Zig</td><td><code>zig/raven.zig</code></td><td>Declaraciones <code>extern</code> y <code>extern struct</code>. También puede leer el header con <code>@cImport(@cInclude("Raven.h"))</code>.</td></tr>
+            <tr><td>LuaJIT</td><td><code>luajit/raven.lua</code></td><td>Declaraciones para el FFI de LuaJIT. <code>local r = require("raven")</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Go</h3>
+      <p>Raven pertenece al hilo que la inicia: llama a <code>runtime.LockOSThread()</code> al principio de <code>main</code>. Las funciones que reciben punteros a estructuras, <code>void*</code> o callbacks de C no están envueltas; se llaman por cgo o se sustituyen por acciones.</p>
+      <div class="code" data-lang="go">
+<pre><code class="language-go">package main
+
+import (
+    "runtime"
+    "raven/raven"
+)
+
+const ui = `
+&lt;Window Title="Hola desde Go" Width="380" Height="220"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="20"&gt;
+        &lt;Label Text="Raven + Go" TextSize="20"/&gt;
+        &lt;Button Text="Salir" Style="Primary" OnClicked="quit"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;`
+
+func main() {
+    runtime.LockOSThread()
+
+    if raven.Init(raven.R_BACKEND_VULKAN) == 0 {
+        panic("no se pudo iniciar Raven")
+    }
+
+    _ = raven.WindowCreateFromXml(ui)
+    raven.ActionBind("quit", func(sender raven.ID, action string) {
+        raven.Quit(0)
+    })
+
+    for raven.WaitFrame(-1.0) != 0 {
+    }
+    raven.Shutdown()
+}</code></pre>
+      </div>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">set CGO_CFLAGS=-I"raven/include"
+set CGO_LDFLAGS=-L"raven/lib"
+go run .</code></pre>
+      </div>
+
+      <h3>C#</h3>
+      <div class="code" data-lang="csharp">
+<pre><code class="language-csharp">using Raven;
+
+const string ui = """
+&lt;Window Title="Hola desde C#" Width="380" Height="220"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="20"&gt;
+        &lt;Label Text="Raven + C#" TextSize="20"/&gt;
+        &lt;Button Text="Salir" Style="Primary" OnClicked="quit"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;
+""";
+
+R.Rinit(RBackend.R_BACKEND_VULKAN);
+R.Rwindow_create_from_xml(ui);
+R.Raction_bind("quit", R.Keep&lt;RActionCallback&gt;((sender, action, user) =&gt; R.Rquit(0)), IntPtr.Zero);
+
+while (R.Rwait_frame(-1.0) != 0) { }
+R.Rshutdown();</code></pre>
+      </div>
+      <p>Se puede instalar con <code>dotnet add package Raven.Gui</code> (incluye la librería) o copiar <code>Raven.cs</code> al proyecto y colocar <code>raven.dll</code> junto al ejecutable. También existe la integración de XMLC con <code>Raven.XmlCs.targets</code>.</p>
+
+      <h3>Zig</h3>
+      <div class="code" data-lang="zig">
+<pre><code class="language-zig">const r = @import("raven.zig");
+
+pub fn main() void {
+    _ = r.Rinit(r.R_BACKEND_VULKAN);
+
+    const xml =
+        \\&lt;Window Title="Hola desde Zig" Width="380" Height="220"&gt;
+        \\  &lt;VBox Spacing="12" Slot.Padding="20"&gt;
+        \\    &lt;Label Text="Raven + Zig" TextSize="20"/&gt;
+        \\    &lt;Button Text="Salir" Style="Primary" OnClicked="quit"/&gt;
+        \\  &lt;/VBox&gt;
+        \\&lt;/Window&gt;
+    ;
+    _ = r.Rwindow_create_from_xml(xml.ptr, xml.len);
+    r.Raction_bind("quit", quit, null);
+
+    while (r.Rwait_frame(-1.0) != 0) {}
+    r.Rshutdown();
+}
+
+fn quit(_: r.Rid, _: ?[*:0]const u8, _: ?*anyopaque) callconv(.C) void {
+    r.Rquit(0);
+}</code></pre>
+      </div>
+      <div class="code" data-lang="zig">
+<pre><code class="language-zig">// build.zig
+const exe = b.addExecutable(.{ .name = "mi_app", .root_source_file = b.path("src/main.zig") });
+exe.linkSystemLibrary("raven");
+exe.linkLibC();</code></pre>
+      </div>
+
+      <h3>LuaJIT</h3>
+      <div class="code" data-lang="lua">
+<pre><code class="language-lua">local r = require("raven")
+
+r.Rinit(r.R_BACKEND_VULKAN)
+
+local ui = [[
+&lt;Window Title="Hola desde Lua" Width="380" Height="220"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="20"&gt;
+        &lt;Label Text="Raven + LuaJIT" TextSize="20"/&gt;
+        &lt;Button Text="Salir" Style="Primary" OnClicked="quit"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;
+]]
+
+r.Rwindow_create_from_xml(ui)
+r.Raction_bind("quit", function(sender, action)
+    r.Rquit(0)
+end)
+
+while r.Rwait_frame(-1.0) ~= 0 do end
+r.Rshutdown()</code></pre>
+      </div>
+      <p>Se instala con <code>luarocks install raven-gui</code> (la librería viene de un release y se localiza con <code>RAVEN_LIBRARY</code>), o se usa el archivo <code>luajit/raven.lua</code> del paquete.</p>
+
+      <h2 id="xmlc">XMLC en cada lenguaje</h2>
+      <p>La interfaz en XML y el código que va con ella en bloques <code>&lt;script&gt;</code>, todo en un archivo. <code>ravenc</code> convierte el archivo entero en una fuente del lenguaje: los scripts se copian tal cual y el XML se transforma en tablas que construye <code>Rwindow_create_from_compiled</code>, sin leer XML en tiempo de ejecución.</p>
+      <p>En el XML, <code>OnClicked="{on_save}"</code> llama a la función <code>on_save</code> del script, y <code>ui().status</code> / <code>ui.x</code> es el widget con <code>Name="status"</code>. El compilador del lenguaje comprueba las dos partes y los errores apuntan a la línea del archivo original.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Extensión</th><th>Lenguaje</th><th>Compilado por</th><th>Firma del callback</th><th>Widgets</th></tr></thead>
+          <tbody>
+            <tr><td><code>.xmlc</code></td><td>C</td><td>CMake: <code>raven_target_xmlc</code></td><td><code>void f(Rid, const char*, void*)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlc++</code>, <code>.xmlcpp</code></td><td>C++</td><td>CMake: <code>raven_target_xmlc</code></td><td><code>void f(Rid, const char*)</code> o lambda</td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlrs</code></td><td>Rust</td><td>Cargo: <code>raven_build::compile</code></td><td><code>fn f(Rid, &amp;str)</code></td><td><code>ui().x</code></td></tr>
+            <tr><td><code>.xmlpy</code></td><td>Python</td><td><code>import raven_xmlpy</code></td><td><code>def f(sender, action)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlgo</code></td><td>Go</td><td><code>//go:generate ravenc</code></td><td><code>func f(raven.ID, string)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmlcs</code></td><td>C#</td><td>MSBuild: <code>Raven.XmlCs.targets</code></td><td><code>static void F(uint, string)</code></td><td><code>MainUi.x</code></td></tr>
+            <tr><td><code>.xmlzig</code></td><td>Zig</td><td><code>xmlzig.compile</code></td><td><code>fn f(Rid, ?[*:0]const u8, ?*anyopaque)</code></td><td><code>ui.x</code></td></tr>
+            <tr><td><code>.xmllua</code></td><td>LuaJIT</td><td><code>require("raven_xmllua")</code></td><td><code>function f(sender, action)</code></td><td><code>ui.x</code></td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="code" data-lang="cmake">
+<pre><code class="language-cmake"># C y C++: el archivo .xmlc es el propio ejecutable
+find_package(raven REQUIRED)
+add_executable(hello main.xmlc)
+target_link_libraries(hello PRIVATE raven::raven)
+raven_target_xmlc(hello)</code></pre>
+      </div>
+      <p>En Rust, el archivo se procesa desde <code>build.rs</code>; en Go, <code>go generate</code> escribe un archivo <code>//go:generate ravenc main.xmlgo -o main.xmlgo.go</code>; en C# y Zig se integra en el <code>.csproj</code> / <code>build.zig</code>. Para desarrollo, los <code>.xml</code> normales se siguen leyendo en tiempo de ejecución y tienen recarga en vivo; los <code>.xml*</code> compilados son para distribuir.</p>
+
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;!-- src/main.xmlc: un programa C completo en un archivo --&gt;
+&lt;script&gt;
+#include &lt;Raven.h&gt;
+#include &lt;stdio.h&gt;
+
+static int clicks = 0;
+
+static void on_hello(Rid sender, const char* action, void* user) {
+    char text[64];
+    snprintf(text, sizeof text, "%d clics", ++clicks);
+    Rlabel_set_text(ui.status, text);       /* Name="status" */
+}
+
+int main(void) {
+    Rinit(R_BACKEND_VULKAN);
+    Rid window = main_create();             /* generado por ravenc */
+    Rwindow_show(window);
+    while (Rwait_frame(-1.0)) {}
+    Rshutdown();
+    return 0;
+}
+&lt;/script&gt;
+
+&lt;Window Title="Hola" Width="400" Height="200"&gt;
+    &lt;VBox Spacing="12" Slot.Padding="24"&gt;
+        &lt;Label Name="status" Text="Sin clics"/&gt;
+        &lt;Button Text="Pulsar" Style="Primary" OnClicked="{on_hello}"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+
+      <h2 id="ide">El IDE</h2>
+      <p><code>raven_designer.exe</code> es el IDE oficial, construido sobre la propia librería. Se abre con una carpeta de proyecto, un <code>.xml</code> o un archivo <code>.xml*</code>. En el paquete está en <code>bin/</code>.</p>
+      <div class="code" data-lang="bash">
+<pre><code class="language-bash">raven_designer.exe
+raven_designer.exe C:\proyectos\mi-editor
+raven_designer.exe mi-interfaz.xml</code></pre>
+      </div>
+
+      <h3>Qué hace</h3>
+      <div class="feature-grid">
+        <div class="feature"><h4><span class="fi">&#9670;</span> Proyectos en ocho lenguajes</h4><p><em>Project &gt; New project</em> pide un nombre y un lenguaje (C, C++, Rust, Python, Go, C#, Zig, Lua) y escribe un proyecto que compila tal cual: la interfaz y su código en un <code>main.xml*</code>, los archivos de las herramientas del lenguaje y <code>strings.csv</code>.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Editor visual</h4><p>El mismo documento en cinco vistas sincronizadas: <strong>Widgets</strong>, <strong>Tree</strong>, <strong>Preview</strong> real, <strong>Properties</strong> y <strong>XML</strong>. Doble clic añade dentro de la selección; se puede mover, duplicar, envolver y desenvuelver.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Código</h4><p>Cada <code>&lt;script&gt;</code> se abre en una pestaña de su lenguaje junto a la vista previa. Los demás archivos se abren en un editor con autocompletado de la API de Raven, de los widgets (<code>ui.&lt;Name&gt;</code>) y de las claves de <code>Rtr("...")</code>.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Traducciones</h4><p>Las tablas CSV como una rejilla: una fila por clave, una columna por idioma. Añadir, buscar, borrar; lo escrito aparece en la vista previa al instante.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Build y run</h4><p><code>Ctrl+B</code> compila, <code>F5</code> compila y ejecuta, <code>Ctrl+F5</code> detiene. Usa CMake y el compilador para C/C++, Cargo para Rust, <code>go generate</code>/<code>go build</code>, <code>dotnet</code>, <code>zig build</code>, Python y LuaJIT.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Errores en su línea</h4><p>Los errores de GCC, Clang, MSVC, rustc, Go, CMake y ravenc van a <strong>Build</strong> y a las líneas de los editores, traducidos del archivo generado a la línea del <code>.xml*</code>. Doble clic abre el archivo en esa línea.</p></div>
+      </div>
+      <p>El editor visual usa solo la API pública. <code>F7</code> abre la vista previa en una ventana propia, el menú View cambia el tema y una carpeta soltada en la ventana se abre como proyecto. Los ajustes de build se guardan en <code>.raven-ide</code>.</p>
+
+      <figure class="shot">
+        <img src="assets/img/designer.png" alt="raven_designer con widgets, árbol, vista previa, propiedades y XML sincronizados">
+        <figcaption><b>raven_designer</b> &mdash; widgets, árbol, vista previa real, propiedades y XML del mismo documento, sincronizados.</figcaption>
+      </figure>
+
+      <h2 id="ejemplos">Los ejemplos</h2>
+      <p>El repositorio de Raven incluye dieciséis programas de ejemplo. No vienen en el paquete precompilado, pero cada uno muestra una parte distinta de la librería y sirve como plantilla para empezar.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ejemplo</th><th>Qué demuestra</th></tr></thead>
+          <tbody>
+            <tr><td><code>hello</code></td><td>Una ventana con la API de C, el punto de partida mínimo.</td></tr>
+            <tr><td><code>editor</code></td><td>Editor de escena en <code>editor.xml</code>: menús, splitters, árbol, pestañas, rejilla de propiedades, viewport en software sobre el job system, grafo personalizado y lista virtual. El menú View cambia entre los cuatro temas.</td></tr>
+            <tr><td><code>notepad</code></td><td>Editor de texto: header bar personalizada, lenguaje elegido por el nombre del archivo, lenguaje declarado por la aplicación, propuestas por callback, marcadores, diálogos del sistema y archivos soltados.</td></tr>
+            <tr><td><code>animations</code></td><td>Transiciones a demanda, cuatro springs en un widget personalizado, tarjetas que aparecen y desaparecen, isla, velocidad y reducción de movimiento.</td></tr>
+            <tr><td><code>workspace</code></td><td>Paneles acoplados, explorador de archivos que abre archivos en paneles nuevos, los tres tipos de cristal, guardar y restaurar la disposición.</td></tr>
+            <tr><td><code>components</code></td><td>Tags declarados con <code>&lt;Widget&gt;</code>, <code>&lt;Repeat&gt;</code>, <code>&lt;ForEach&gt;</code>, <code>&lt;Include&gt;</code> y una parte de interfaz construida desde C como documento.</td></tr>
+            <tr><td><code>memory</code></td><td>Un allocator dado por la aplicación, estadísticas de la librería y comprobación del heap.</td></tr>
+            <tr><td><code>studio</code></td><td>Grafo de nodos con widgets dentro, enlaces que la aplicación puede rechazar, nodos añadidos desde código; línea de tiempo que reproduce y selector de color que colorea los nodos; el XML se recarga al guardarlo.</td></tr>
+            <tr><td><code>themes</code></td><td>Dos archivos de tema, estilos y clases, una tarjeta con tema propio, Markdown en etiqueta y editor; todos los archivos se vigilan.</td></tr>
+            <tr><td><code>overlay</code></td><td>Ventana transparente, backdrops del sistema y las cuatro formas de desenfocar lo que hay detrás de un panel.</td></tr>
+            <tr><td><code>browser</code></td><td>Páginas web con <code>raven_web</code>: barra de direcciones, historial, selector de color de Raven que cambia el CSS de la página y mensajes desde la página.</td></tr>
+            <tr><td><code>glass</code></td><td>Temas de cristal y los tres materiales. <code>raven_glass light</code> arranca con el cristal claro.</td></tr>
+            <tr><td><code>viewport_vulkan</code></td><td>Una escena Vulkan en la interfaz, dos veces: imagen fuera de pantalla envuelta como textura y dibujada en el render pass de Raven.</td></tr>
+            <tr><td><code>viewport_opengl</code></td><td>Una escena OpenGL en una ventana hija nativa (WGL / GLX).</td></tr>
+            <tr><td><code>bevy_editor</code></td><td>Editor de escenas 3D en Rust con toda la interfaz en un <code>.xmlrs</code>: jerarquía, inspector, gizmos, undo y archivos de escena. Bevy dibuja en el viewport; sin Bevy, un renderer por software.</td></tr>
+            <tr><td><code>languages</code></td><td>El mismo programa en C, C++, Rust, Python, Go, C#, Zig y Lua, un <code>main.xml*</code> por lenguaje, tal como los crea el IDE.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <figure class="shot">
+        <img src="assets/img/bevy_editor_viewport.png" alt="Editor de escenas Bevy con un cubo seleccionado y gizmo de movimiento">
+        <figcaption><b>examples/bevy_editor</b> &mdash; el viewport del editor de escenas escrito en <code>.xmlrs</code>, con el gizmo sobre el cubo seleccionado.</figcaption>
+      </figure>
+
+      <h2 id="faq">Preguntas frecuentes</h2>
+
+      <h3>¿Raven es gratis? ¿Qué licencia tiene?</h3>
+      <p>Sí. Raven se distribuye bajo <strong>Apache License 2.0</strong>. Puedes usarlo en proyectos comerciales y privados; conserva el aviso de licencia y, si modificas archivos, indica los cambios. Las licencias de terceros (stb, Roboto, Roboto Mono, tweetnacl) están en <code>share/raven/licenses/</code>.</p>
+
+      <h3>¿En qué estado está el proyecto?</h3>
+      <p>En desarrollo activo. La API pública puede cambiar antes de la versión 1.0 y algunas áreas están incompletas: Wayland nativo, shaping OpenType completo para escrituras índicas, cursores múltiples y búsqueda en el editor, arrastrar de Raven a otra aplicación, knot/grupos/minimapa en el grafo, pistas anidadas y curvas en la línea de tiempo, imágenes remotas en Markdown. La documentación original mantiene una lista de “Not implemented yet”.</p>
+
+      <h3>¿Qué necesito para compilar este paquete en Windows?</h3>
+      <p>Un compilador de <strong>MinGW-w64 x64</strong> y CMake. El paquete es estático y está hecho para ese compilador; no sirve para MSVC ni para MinGW de 32 bits. Con CMake, <code>find_package(raven)</code> y <code>raven::raven</code> ya añaden las librerías del sistema. Si compilas a mano, añade la lista de <code>-lwinhttp -lgdi32 …</code> de la sección de C++.</p>
+
+      <h3>¿Por qué el enlace necesita tantas librerías de Windows?</h3>
+      <p>Raven no enlaza Vulkan ni depende de Qt, GTK o Electron: trae su propio renderer, su decodificador de imágenes, sus fuentes y su asignador. Aun así, la capa de plataforma usa las APIs del sistema para ventanas, diálogos, DWM/blur, portapapeles, red, COM y criptografía. CMake las agrupa; el enlace manual las pide una a una.</p>
+
+      <h3>¿Puedo usar Visual Studio?</h3>
+      <p>Con este paquete no: las bibliotecas de MinGW y MSVC no son compatibles. Necesitas el paquete <code>raven-windows-msvc-x64-*</code> correspondiente, o compilar Raven desde el código fuente con Visual Studio. Lo mismo vale para Linux y macOS: usa el paquete de tu plataforma o compila desde fuente.</p>
+
+      <h3>¿Cómo distribuyo mi aplicación?</h3>
+      <p>Con la variante estática, el ejecutable enlaza <code>libraven.a</code> y no necesita una DLL de Raven; aun así, distribuye las licencias de terceros. Con la compartida, lleva <code>raven.dll</code> junto al ejecutable (y las DLLs de MinGW que falten: <code>libgcc_s_seh-1.dll</code>, <code>libstdc++-6.dll</code>, <code>libwinpthread-1.dll</code> si no son estáticas). Las fuentes e imágenes que cargues por ruta también deben viajar con la aplicación.</p>
+
+      <h3>¿Necesito Vulkan instalado?</h3>
+      <p>Para ejecutar una aplicación ya compilada, no: Raven crea su instancia y su dispositivo Vulkan, y en Windows usa el runtime del sistema/driver. Para compilar desde el código fuente sí necesitas los headers de Vulkan; no forman parte del repositorio. En macOS se usa MoltenVK. También existe el backend nulo (<code>R_BACKEND_NULL</code>) para tests sin ventana ni GPU.</p>
+
+      <h3>¿Puedo usar OpenGL o Direct3D en vez de Vulkan?</h3>
+      <p>El renderer de Raven es Vulkan, pero un <code>Viewport</code> puede mostrar una textura de otra API, dibujar en el render pass o crear una ventana hija nativa donde tu motor use OpenGL o Direct3D. Para sustituir el renderer completo existe <code>RBackendVTable</code> y <code>Rbackend_register</code>; el backend nulo es la plantilla.</p>
+
+      <h3>¿El editor de texto tiene language server?</h3>
+      <p>No. El editor colorea, cierra pares, indenta, comenta y propone palabras a partir del texto y del lenguaje, pero no entiende un programa entero. Para eso hay dos puntos de extensión: <code>Rtext_editor_set_completion_callback</code> y <code>Rtext_editor_add_marker</code>. Un cliente LSP se conectaría ahí; Raven no incluye uno.</p>
+
+      <h3>¿Por qué la vista web no carga?</h3>
+      <p><code>raven_web</code> no incluye un navegador: conduce uno de la familia Chromium que ya esté instalado. Comprueba <code>Rweb_is_available()</code> y <code>Rweb_get_browser_path()</code>. Si no encuentra Edge o Chrome, define <code>RAVEN_WEB_BROWSER</code> o llama a <code>Rweb_set_browser_path</code>. Para diagnóstico, <code>RAVEN_WEB_TRACE=1</code> imprime cada mensaje y <code>RAVEN_WEB_DEBUG=1</code> deja pasar la salida de error del navegador.</p>
+
+      <h3>¿Hay binarios para Linux o macOS?</h3>
+      <p>El proyecto publica paquetes por plataforma y compilador. Esta carpeta es solo Windows MinGW-w64 x64 estático. Para Linux o macOS, compila desde el código fuente con CMake; en macOS se usa MoltenVK y en Linux X11 (Wayland funciona a través de XWayland).</p>
+
+      <div class="callout tip">
+        <div class="ci">&#128161;</div>
+        <p>Si algo no arranca, empieza por <a href="guia.html#problemas">Problemas frecuentes</a> de la guía: cubre el backend, la DLL que falta, el compilador equivocado, la fuente que no se encuentra y el bucle que no dibuja.</p>
+      </div>
+
+      <div class="pager">
+        <a href="api.html"><span>Anterior</span>&larr; La API de C</a>
+        <a class="next" href="index.html"><span>Volver al inicio</span>Introducción &rarr;</a>
+      </div>
+
+      <div class="footer">
+        <span>Raven Docs &middot; documentación comunitaria de Raven 0.1.3</span>
+        <span>Hecho con HTML, CSS y JavaScript sin dependencias. <a href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener">Raven en GitHub</a></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/search-index.js"></script>
+<script src="assets/js/api-index.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

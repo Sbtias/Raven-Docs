@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Raven Docs — Guía completa de la librería GUI en C</title>
+<meta name="description" content="Documentación completa de Raven: instalación, primeros pasos, XML, XMLC, temas, glass, widgets, herramientas, API de C y bindings para C++, Python, Rust, Go, C#, Zig y LuaJIT.">
+<link rel="icon" type="image/png" href="assets/img/logo-white.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('raven-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
+</head>
+<body data-page="index.html">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Abrir el menú">&equiv;</button>
+  <a class="brand" href="index.html"><img src="assets/img/logo-white.png" alt=""><span>Raven <b>Docs</b></span><span class="ver">v0.1.3</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="search-btn" id="search-open" aria-label="Buscar en la documentación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span class="label">Buscar...</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="icon-btn" id="theme-toggle" aria-label="Cambiar de tema">&#9788;</button>
+  <a class="ghbtn" href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener" aria-label="Raven en GitHub">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+    <span class="label">GitHub</span>
+  </a>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"><div id="sidebar-nav"></div></aside>
+  <main id="main">
+    <div class="content wide">
+
+      <section class="hero">
+        <span class="eyebrow">Documentación &middot; Raven 0.1.3</span>
+        <h1>Raven, <span class="grad">documentado de principio a fin</span>.</h1>
+        <p class="lead">Una librería GUI en C11 para construir editores y herramientas de escritorio: ventanas nativas, layout estilo Slate, interfaces en XML, materiales de cristal, un editor de código y bindings para ocho lenguajes. Esta guía explica cómo instalarla, cómo se usa y qué contiene cada parte de su API.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="guia.html#instalacion">Empezar ahora &rarr;</a>
+          <a class="btn btn-ghost" href="api.html">Ver la API de C</a>
+        </div>
+        <div class="hero-meta">
+          <span class="chip"><b>C11</b> &middot; sin dependencias enlazadas</span>
+          <span class="chip"><b>Vulkan</b> &middot; Windows, Linux, macOS</span>
+          <span class="chip"><b>XML</b> + XMLC</span>
+          <span class="chip"><b>Apache 2.0</b></span>
+        </div>
+
+        <div class="hero-visual">
+          <div class="window-bar"><i></i><i></i><i></i><span>examples/studio &mdash; dark glass</span></div>
+          <img src="assets/img/studio_glass.png" alt="El ejemplo studio de Raven: un grafo de nodos, un selector de color y una línea de tiempo con tema de cristal oscuro.">
+          <div class="hero-glow"></div>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><b>1,3 MB</b><span>librería compartida strip, fuentes incluidas</span></div>
+          <div class="stat"><b>921</b><span>funciones públicas en los headers</span></div>
+          <div class="stat"><b>8</b><span>lenguajes: C, C++, Rust, Python, Go, C#, Zig, LuaJIT</span></div>
+          <div class="stat"><b>0</b><span>dependencias que enlazar</span></div>
+        </div>
+      </section>
+
+      <h2 id="que-es">¿Qué es Raven?</h2>
+      <p>Raven es una librería de interfaz gráfica <strong>retained-mode</strong> escrita en C11. El árbol de widgets se conserva entre frames; solo se vuelve a medir, pintar y presentar lo que cambió. La aplicación escribe su propio bucle y pide un frame cada vez con <code>Rdraw_frame()</code> o <code>Rwait_frame()</code>. Debajo, Raven abre ventanas nativas con Win32, X11 o Cocoa, y dibuja con Vulkan (MoltenVK en macOS).</p>
+
+      <div class="cards">
+        <div class="card">
+          <div class="ic">&#9881;</div>
+          <h3>Pequeña y autónoma</h3>
+          <p>No enlaza Vulkan ni depende de Qt, GTK o Electron. Tiene su propio asignador, su decodificador de imágenes, sus fuentes y su renderer. Un único header: <code>&lt;Raven.h&gt;</code>.</p>
+        </div>
+        <div class="card">
+          <div class="ic violet">&#10070;</div>
+          <h3>Interfaz declarativa</h3>
+          <p>Escribe ventanas en XML, con <code>Slot.*</code>, acciones, temas y tags propios. O compila el XML y el código en un solo archivo con <code>ravenc</code> (XMLC) en cualquiera de los ocho lenguajes.</p>
+        </div>
+        <div class="card">
+          <div class="ic green">&#9635;</div>
+          <h3>Herramientas de autor</h3>
+          <p>Editor de texto con sintaxis, docking con pestañas desprendibles, grafo de nodos, línea de tiempo, selector de color, editor de bloques, visores web y viewports para tu propio renderer.</p>
+        </div>
+      </div>
+
+      <h2 id="caracteristicas">Lo que trae</h2>
+      <div class="feature-grid">
+        <div class="feature"><h4><span class="fi">&#9670;</span> Layout Slate</h4><p>VBox, HBox, Grid, Overlay, Border, Canvas, ScrollBox, Splitter, WrapBox, Switcher, TabView, Expander y DockArea. Cada hijo lleva su <em>slot</em>: relleno, alineación, tamaño.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Ventanas nativas</h4><p>Win32, X11 y Cocoa. Header bar personalizada, ventanas transparentes, backdrop blur/acrylic/mica, opacidad y arrastre de archivos.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Materiales de cristal</h4><p>Solid, Glass, FrostedGlass y TintedGlass. Los paneles se ven a través, se difuminan y refractan lo que hay detrás, con temas claros y oscuros.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Animaciones con springs</h4><p>Los controles se estiran, rebotan y se asientan solos. Transiciones Fade, Pop, Zoom, Fly, Drop, Slide; motion Snappy, Smooth, Bouncy, Wobbly.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Texto completo</h4><p>Editor multilínea con resaltado para 13 lenguajes, autocompletado, pares de brackets, marcadores de error, Markdown, RTL, shaping árabe y emoji a color.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Accesibilidad</h4><p>UI Automation en Windows, NSAccessibility en macOS, AT-SPI en Linux. Escala de texto, alto contraste, filtros de color y reducción de movimiento.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> i18n</h4><p>Tablas CSV, <code>Rtr("clave")</code>, plurales CLDR, formato de números por idioma y layouts que se reflejan automáticamente en RTL.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Multihilo</h4><p>Hilo de render dedicado, job system, tareas asíncronas, decodificación de imágenes en segundo plano y pintado paralelo de árboles grandes.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Viewports</h4><p>Muestra una textura, dibuja dentro del render pass de Raven o crea una ventana hija nativa para OpenGL, Direct3D o lo que necesites.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Web real</h4><p><code>raven_web</code> conduce un Chromium ya instalado (Edge en Windows) por el protocolo DevTools: página real, entrada real, JavaScript en ambos sentidos.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Recarga en vivo</h4><p>Guarda el XML, el tema o las traducciones y la interfaz se actualiza conservando handles, callbacks, scroll y texto escrito.</p></div>
+        <div class="feature"><h4><span class="fi">&#9670;</span> Tu propio backend</h4><p>El renderer está detrás de una tabla de funciones. Puedes registrar otro backend o usar el nulo para tests headless sin GPU.</p></div>
+      </div>
+
+      <h2 id="galeria">Visto en acción</h2>
+      <div class="gallery">
+        <figure class="shot"><img src="assets/img/designer.png" alt="El IDE raven_designer con widgets, árbol, vista previa, propiedades y XML"><figcaption><b>raven_designer</b> &mdash; el IDE oficial: widgets, árbol, preview real, propiedades y XML sincronizados.</figcaption></figure>
+        <figure class="shot"><img src="assets/img/workspace.png" alt="Ejemplo workspace con paneles dockeados, explorador de archivos y una isla"><figcaption><b>examples/workspace</b> &mdash; paneles dockeados, explorador de archivos, isla y glass oscuro.</figcaption></figure>
+        <figure class="shot"><img src="assets/img/glass.png" alt="Ejemplo glass con barra lateral esmerilada y barra de reproducción transparente"><figcaption><b>examples/glass</b> &mdash; barra lateral esmerilada, barra de herramientas tintada y controles tipo cápsula.</figcaption></figure>
+        <figure class="shot"><img src="assets/img/notepad.png" alt="Ejemplo notepad con header bar personalizada y resaltado de código"><figcaption><b>examples/notepad</b> &mdash; editor con header bar propia, lenguajes y marcadores TODO/FIXME.</figcaption></figure>
+        <figure class="shot"><img src="assets/img/browser.png" alt="Ejemplo browser mostrando una página web real dentro de Raven"><figcaption><b>examples/browser</b> &mdash; una página web real en un widget, con barra de direcciones e historial.</figcaption></figure>
+        <figure class="shot"><img src="assets/img/animations.png" alt="Ejemplo animations con tarjetas y springs"><figcaption><b>examples/animations</b> &mdash; transiciones, springs y tarjetas que aparecen y desaparecen.</figcaption></figure>
+      </div>
+
+      <h2 id="inicio-rapido">Empieza en dos minutos</h2>
+      <p>Con este paquete precompilado para Windows (MinGW-w64 x64, estático) solo necesitas un compilador de MinGW y CMake. La guía de instalación explica también cómo compilar desde el código fuente y cómo usar el paquete desde Visual Studio.</p>
+
+      <div class="code" data-lang="c">
+<pre><code class="language-c">#include &lt;Raven.h&gt;
+
+static void on_clicked(Rid button, void* user) {
+    Rquit(0);
+}
+
+int main(void) {
+    Rinit(R_BACKEND_VULKAN);
+
+    Rid window = Rwindow_create("Hello", 420, 220, R_WINDOW_DEFAULT);
+    Rid box = Rwidget_create(R_WIDGET_VBOX);
+    Rpanel_set_spacing(box, 12);
+    Rslot_set_halign(box, R_HALIGN_CENTER);
+    Rslot_set_valign(box, R_VALIGN_CENTER);
+    Rwindow_set_content(window, box);
+
+    Rwidget_add_child(box, Rlabel_create("Hello from Raven"));
+    Rid button = Rwidget_add_child(box, Rbutton_create("Quit"));
+    Rbutton_set_clicked_callback(button, on_clicked, NULL);
+
+    while (Rwait_frame(-1.0)) {}
+    Rshutdown();
+    return 0;
+}</code></pre>
+      </div>
+
+      <div class="code" data-lang="cmake">
+<pre><code class="language-cmake">cmake_minimum_required(VERSION 3.16)
+project(hello C)
+
+set(CMAKE_PREFIX_PATH "C:/ruta/a/raven-windows-mingw-x64-static")
+find_package(raven REQUIRED)
+
+add_executable(hello main.c)
+target_link_libraries(hello PRIVATE raven::raven)</code></pre>
+      </div>
+
+      <p class="small muted">¿Prefieres declarar la interfaz? El mismo programa en XML:</p>
+      <div class="code" data-lang="xml">
+<pre><code class="language-xml">&lt;Window Title="Hello" Width="420" Height="220"&gt;
+    &lt;VBox Spacing="12" Slot.HAlign="Center" Slot.VAlign="Center"&gt;
+        &lt;Label&gt;Hello from Raven&lt;/Label&gt;
+        &lt;Button Text="Quit" OnClicked="app.quit"/&gt;
+    &lt;/VBox&gt;
+&lt;/Window&gt;</code></pre>
+      </div>
+
+      <h2 id="explorar">Explora la documentación</h2>
+      <div class="cards">
+        <div class="card"><div class="ic">&#9654;</div><h3>Guía</h3><p>Instalación, primera ventana, bucle, layout, ventanas, eventos, memoria, hilos, animaciones, diálogos y viewports.</p><a class="stretch" href="guia.html" aria-label="Abrir la guía"></a></div>
+        <div class="card"><div class="ic violet">&#9670;</div><h3>XML y XMLC</h3><p>Todos los tags, atributos y slots; expresiones, tags propios, documentos y el compilador <code>ravenc</code>.</p><a class="stretch" href="xml.html" aria-label="Abrir la referencia XML"></a></div>
+        <div class="card"><div class="ic green">&#9635;</div><h3>Interfaz</h3><p>Temas, glass, blur, editor de código, docking, isla, herramientas, accesibilidad, idiomas y web.</p><a class="stretch" href="interfaz.html" aria-label="Abrir la guía de interfaz"></a></div>
+        <div class="card"><div class="ic">&#60;/&#62;</div><h3>API de C</h3><p>Las funciones esenciales por área y un índice completo de 921 funciones con búsqueda instantánea.</p><a class="stretch" href="api.html" aria-label="Abrir la referencia de la API"></a></div>
+        <div class="card"><div class="ic violet">&#9881;</div><h3>Otros lenguajes</h3><p>Bindings de C++, Python, Rust, Go, C#, Zig y LuaJIT, el IDE y los dieciséis ejemplos.</p><a class="stretch" href="lenguajes.html" aria-label="Abrir la guía de lenguajes"></a></div>
+        <div class="card"><div class="ic green">&#10003;</div><h3>Preguntas frecuentes</h3><p>Licencia, estado del proyecto, limitaciones conocidas y qué hacer cuando algo no arranca.</p><a class="stretch" href="lenguajes.html#faq" aria-label="Abrir las preguntas frecuentes"></a></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="ci">&#128161;</div>
+        <p><strong>Esta documentación es independiente.</strong> Está escrita a partir del paquete 0.1.3 (headers, README y documentación incluida) para explicar la librería de forma práctica. Raven está en desarrollo activo: la API pública puede cambiar antes de la versión 1.0.</p>
+      </div>
+
+      <div class="footer">
+        <span>Raven Docs &middot; documentación comunitaria de Raven 0.1.3</span>
+        <span>Hecho con HTML, CSS y JavaScript sin dependencias. <a href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener">Raven en GitHub</a></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/search-index.js"></script>
+<script src="assets/js/api-index.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>

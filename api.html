@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="es" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>API de C — Raven Docs</title>
+<meta name="description" content="Referencia de la API pública de Raven: núcleo, ventanas, widgets, layout, controles, temas, recursos, XML, herramientas, dibujo, Vulkan y un índice completo de 921 funciones.">
+<link rel="icon" type="image/png" href="assets/img/logo-white.png">
+<link rel="stylesheet" href="assets/css/style.css">
+<script>try{var t=localStorage.getItem('raven-theme');if(t==='light')document.documentElement.dataset.theme='light';}catch(e){}</script>
+</head>
+<body data-page="api.html">
+<a class="skip" href="#main">Saltar al contenido</a>
+<div class="progress" id="progress"></div>
+
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menu-toggle" aria-label="Abrir el menú">&equiv;</button>
+  <a class="brand" href="index.html"><img src="assets/img/logo-white.png" alt=""><span>Raven <b>Docs</b></span><span class="ver">v0.1.3</span></a>
+  <div class="topbar-spacer"></div>
+  <button class="search-btn" id="search-open" aria-label="Buscar en la documentación">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+    <span class="label">Buscar...</span><kbd>Ctrl K</kbd>
+  </button>
+  <button class="icon-btn" id="theme-toggle" aria-label="Cambiar de tema">&#9788;</button>
+  <a class="ghbtn" href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener" aria-label="Raven en GitHub">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55v-2.15c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.03 1.76 2.69 1.25 3.35.96.1-.74.4-1.25.72-1.54-2.55-.29-5.23-1.28-5.23-5.68 0-1.26.45-2.28 1.18-3.09-.12-.29-.51-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11.1 11.1 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.62 1.59.23 2.76.11 3.05.74.81 1.18 1.83 1.18 3.09 0 4.41-2.69 5.38-5.25 5.67.41.35.78 1.05.78 2.12v3.14c0 .3.21.67.8.55A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
+    <span class="label">GitHub</span>
+  </a>
+</header>
+
+<div class="shell">
+  <aside class="sidebar" id="sidebar"><div id="sidebar-nav"></div></aside>
+  <main id="main">
+    <div class="content">
+
+      <div class="page-head">
+        <span class="eyebrow">Referencia de C</span>
+        <h1>La API pública, sin rodeos</h1>
+        <p>Todo lo que se puede llamar desde una aplicación está en <code>&lt;Raven.h&gt;</code>: <strong>921 funciones</strong> repartidas en veinte headers. Esta página explica las áreas y los patrones que se repiten; el índice final tiene la firma y la descripción de cada función, con búsqueda instantánea.</p>
+      </div>
+
+      <div class="toc">
+        <h4>En esta página</h4>
+        <ol>
+          <li><a href="#nucleo">Núcleo, bucle y memoria</a></li>
+          <li><a href="#ventanas">Ventanas</a></li>
+          <li><a href="#widgets">Widgets y layout</a></li>
+          <li><a href="#controles">Controles</a></li>
+          <li><a href="#temas">Temas, fuentes y recursos</a></li>
+          <li><a href="#xml">XML y documentos</a></li>
+          <li><a href="#herramientas">Herramientas, diálogos y dibujo</a></li>
+          <li><a href="#indice">Índice completo</a></li>
+        </ol>
+      </div>
+
+      <h2 id="nucleo">Núcleo, bucle y memoria</h2>
+      <p>El header <code>raven_core.h</code> contiene el ciclo de vida, el bucle de frames, los handles, los errores, las acciones, los timers, las tareas y el montón propio de Raven.</p>
+
+      <h3>Arrancar y parar</h3>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">#include &lt;Raven.h&gt;
+
+int main(void) {
+    RInitDesc desc = {0};
+    desc.backend  = R_BACKEND_VULKAN;
+    desc.app_name = "Mi editor";
+    if (!Rinit_ex(&amp;desc)) {
+        return 1;
+    }
+
+    /* ventanas y widgets... */
+
+    while (Rwait_frame(-1.0)) {
+        /* el bucle de la aplicación: aquí van las tareas periódicas */
+    }
+
+    Rshutdown();
+    return Rget_exit_code();
+}</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Función</th><th>Qué hace</th></tr></thead>
+          <tbody>
+            <tr><td><code>Rinit</code> / <code>Rinit_ex</code></td><td>Arranca la librería con valores por defecto o con una <code>RInitDesc</code> explícita (backend, nombre, headless, allocator…). Devuelve <code>R_FALSE</code> si no puede.</td></tr>
+            <tr><td><code>Rdraw_frame</code></td><td>Produce un frame: procesa eventos pendientes sin esperar, ejecuta tareas, anima, mide, pinta y presenta. Devuelve <code>R_FALSE</code> cuando toca salir.</td></tr>
+            <tr><td><code>Rwait_frame(seconds)</code></td><td>Igual, pero antes duerme hasta que haya algo que hacer: un evento del sistema, una tarea, un timer o un frame que pedir. Con <code>-1.0</code> espera indefinidamente.</td></tr>
+            <tr><td><code>Rquit(code)</code></td><td>Hace que <code>Rdraw_frame</code> y <code>Rwait_frame</code> devuelvan <code>R_FALSE</code>. Es seguro llamarlo desde otro hilo.</td></tr>
+            <tr><td><code>Rget_exit_code</code></td><td>El código dado a <code>Rquit</code>, o <code>0</code> si se cerró la última ventana.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Handles y errores</h3>
+      <p>Ventanas, widgets, texturas, fuentes y documentos son <code>Rid</code>: un identificador opaco. <code>R_INVALID_ID</code> representa “ninguno”. Las funciones que aceptan un <code>Rid</code> comprueban que siga vivo; una llamada con un handle inválido no rompe el proceso y se reporta por el callback de errores.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void on_error(RError code, RSeverity severity, const char* detail) {
+    fprintf(stderr, "[raven] %s\n", detail);
+}
+
+Rerror_set_callback(on_error);</code></pre>
+      </div>
+
+      <h3>Acciones, timers y tareas</h3>
+      <p>Las acciones son el puente entre el XML (<code>OnClicked="file.save"</code>) y el código. Un mismo nombre puede tener varias implementaciones; se ejecutan todas.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Raction_bind("file.save", on_save, app);
+Raction_fire("file.save", editor);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Grupo</th><th>Funciones</th></tr></thead>
+          <tbody>
+            <tr><td>Timers</td><td><code>Rtimer_create</code>, <code>Rtimer_destroy</code>, <code>Rtimer_is_valid</code>. Intervalo en segundos, repetible o de un disparo, callback en el hilo de UI.</td></tr>
+            <tr><td>Tareas</td><td><code>Rtask_post</code> (ejecuta una función en el hilo de UI), <code>Rtask_run_async</code> (en un worker) y <code>Rparallel_for</code> (reparte un rango entre los workers).</td></tr>
+            <tr><td>Hilos</td><td><code>Rwake_up</code>, <code>Rget_time</code>, <code>Rwindow_request_redraw</code>, <code>Rquit</code> y las funciones de memoria son seguras desde otros hilos.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>Memoria</h3>
+      <p>Raven no llama a <code>malloc</code>: toma memoria del sistema por regiones de 4 MB y la reparte con su propio heap (TLSF: tiempo constante y vecinos fusionados al liberar). Los decodificadores de fuente e imagen incluidos también lo usan.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RAllocator mio = { my_alloc, my_realloc, my_free, my_data };
+Rset_allocator(&amp;mio);                 /* antes de Rinit: todo pasa por tus funciones */
+
+RMemoryStats stats;
+Rmemory_get_stats(&amp;stats);            /* bloques, bytes en uso, pico, tomado del sistema */
+Rmemory_check();                      /* recorre el heap y verifica su estructura       */
+Rmemory_trim();                       /* devuelve al sistema las regiones vacías        */</code></pre>
+      </div>
+      <p><code>Rset_allocator(Rallocator_get_system())</code> o <code>RAVEN_ALLOCATOR=system</code> selecciona <code>malloc</code>, que es lo que siguen Valgrind y los perfiladores de heap (también es el defecto en una compilación con AddressSanitizer).</p>
+
+      <h2 id="ventanas">Ventanas</h2>
+      <p><code>raven_window.h</code> abre ventanas nativas con Win32, X11 o Cocoa y expone todo lo que se puede hacer con ellas sin tocar la plataforma.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid window = Rwindow_create("Editor", 1200, 760, R_WINDOW_DEFAULT);
+Rwindow_set_min_size(window, 720, 480);
+Rwindow_set_content(window, root);
+Rwindow_show(window);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Área</th><th>Funciones representativas</th></tr></thead>
+          <tbody>
+            <tr><td>Crear y destruir</td><td><code>Rwindow_create</code>, <code>Rwindow_destroy</code>, <code>Rwindow_is_valid</code>, <code>Rwindow_create_from_xml[_file]</code>, <code>Rwindow_create_from_compiled</code>.</td></tr>
+            <tr><td>Contenido y estado</td><td><code>Rwindow_set_content</code>, <code>Rwindow_get_content</code>, <code>Rwindow_set_title</code>, <code>Rwindow_set_size</code>, <code>Rwindow_set_position</code>, <code>Rwindow_show</code>, <code>Rwindow_hide</code>, <code>Rwindow_maximize</code>, <code>Rwindow_minimize</code>, <code>Rwindow_restore</code>.</td></tr>
+            <tr><td>Pantalla y escala</td><td><code>Rwindow_get_framebuffer_size</code>, <code>Rwindow_get_scale</code>, <code>Rwindow_set_opacity</code>, <code>Rwindow_set_background</code>, <code>Rwindow_capture</code>.</td></tr>
+            <tr><td>Materiales del sistema</td><td><code>Rwindow_set_backdrop</code>, <code>Rwindow_get_backdrop</code> (<code>Transparent</code>, <code>Blur</code>, <code>Acrylic</code>, <code>Mica</code>).</td></tr>
+            <tr><td>Entrada</td><td><code>Rwindow_set_drop_callback</code>, <code>Rwindow_inject_mouse_move</code>, <code>_button</code>, <code>_wheel</code>, <code>_key</code>, <code>_text</code>, <code>_focus</code>, útiles para tests headless.</td></tr>
+            <tr><td>Diálogos y atajos</td><td><code>Rwindow_has_dialog</code>, <code>Rwindow_set_close_callback</code>, <code>Rwindow_register_shortcut</code>, <code>Rwindow_unregister_shortcut</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Las banderas de <code>Rwindow_create</code> se combinan con <code>|</code>: <code>R_WINDOW_NO_RESIZE</code>, <code>R_WINDOW_HIDDEN</code>, <code>R_WINDOW_BORDERLESS</code>, <code>R_WINDOW_MAXIMIZED</code>, <code>R_WINDOW_CUSTOM_HEADER</code> y <code>R_WINDOW_TRANSPARENT</code>.</p>
+
+      <h2 id="widgets">Widgets y layout</h2>
+      <p>El árbol de widgets se conserva entre frames. Un widget nace sin ventana; se muestra cuando se añade a un padre que ya pertenece a una. <code>Rwidget_create</code> recibe un <code>RWidgetType</code>; para los tipos más comunes hay atajos como <code>Rlabel_create</code>, <code>Rbutton_create</code> o <code>Rtext_editor_create</code>.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid root  = Rwidget_create(R_WIDGET_VBOX);
+Rid title = Rwidget_add_child(root, Rlabel_create("Hola"));
+Rid field = Rwidget_add_child(root, Rwidget_create(R_WIDGET_TEXT_INPUT));
+Rid btn   = Rwidget_add_child(root, Rbutton_create("Saludar"));
+
+Rwidget_set_name(field, "nombre");
+Rpanel_set_spacing(root, 12.0f);
+Rslot_set_padding(root, 16, 16, 16, 16);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Grupo</th><th>Funciones</th></tr></thead>
+          <tbody>
+            <tr><td>Árbol</td><td><code>Rwidget_add_child</code>, <code>Rwidget_insert_child</code>, <code>Rwidget_remove_child</code>, <code>Rwidget_clear_children</code>, <code>Rwidget_get_parent</code>, <code>Rwidget_get_child_count</code>, <code>Rwidget_get_child</code>, <code>Rwidget_find</code>.</td></tr>
+            <tr><td>Identidad</td><td><code>Rwidget_set_name</code>, <code>Rwidget_get_name</code>, <code>Rwidget_get_type</code>, <code>Rwidget_is_valid</code>, <code>Rwidget_destroy</code>, <code>Rwidget_get_window</code>.</td></tr>
+            <tr><td>Geometría</td><td><code>Rwidget_get_rect</code>, <code>Rwidget_set_size</code>, <code>Rwidget_set_visibility</code>, <code>Rwidget_set_enabled</code>, <code>Rwidget_focus</code>, <code>Rwidget_scroll_into_view</code>.</td></tr>
+            <tr><td>Estilo</td><td><code>Rwidget_set_color</code>, <code>Rwidget_set_metric</code>, <code>Rwidget_set_material</code>, <code>Rwidget_set_class</code>, <code>Rwidget_add_class</code>, <code>Rwidget_remove_class</code>, <code>Rwidget_has_class</code>, <code>Rwidget_set_theme</code>.</td></tr>
+            <tr><td>Eventos</td><td><code>Rwidget_set_event_callback</code>, <code>Rwidget_set_action</code>, <code>Rwidget_set_tooltip</code>, <code>Rwidget_set_drop_callback</code>; cada control añade callbacks propios (<code>Rbutton_set_clicked_callback</code>, <code>Rtext_input_set_changed_callback</code>…).</td></tr>
+            <tr><td>Personalizado</td><td><code>Rcustom_set_measure_callback</code>, <code>Rcustom_set_paint_callback</code>, <code>Rwidget_set_destroy_callback</code>, <code>Rxml_register_tag</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h3>El slot del hijo</h3>
+      <p>El layout no se configura en el padre sino en el <em>slot</em> de cada hijo: relleno, alineación, tamaño, columnas, anclas, dock o título de pestaña. Es el equivalente a <code>Slot.*</code> en XML.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rslot_set_padding(btn, 8, 4, 8, 4);
+Rslot_set_halign(btn, R_HALIGN_RIGHT);
+Rslot_set_valign(btn, R_VALIGN_CENTER);
+Rslot_set_fill(btn, 1.0f);
+Rslot_set_grid(btn, 1, 0);</code></pre>
+      </div>
+
+      <h3>Contenedores de layout</h3>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Widget</th><th>Comportamiento</th></tr></thead>
+          <tbody>
+            <tr><td><code>R_WIDGET_VBOX</code> / <code>HBOX</code></td><td>Apila hijos vertical u horizontalmente; <code>Rpanel_set_spacing</code>.</td></tr>
+            <tr><td><code>R_WIDGET_GRID</code></td><td>Columnas y filas con <code>Slot.Column</code>/<code>Slot.Row</code>; las columnas pueden tener relleno.</td></tr>
+            <tr><td><code>R_WIDGET_UNIFORM_GRID</code></td><td>Celdas iguales, fila a fila.</td></tr>
+            <tr><td><code>R_WIDGET_OVERLAY</code></td><td>Hijos apilados; el último se dibuja encima.</td></tr>
+            <tr><td><code>R_WIDGET_BORDER</code></td><td>Un hijo con fondo, borde, esquinas, sombra, material o efecto.</td></tr>
+            <tr><td><code>R_WIDGET_SIZE_BOX</code> / <code>SPACER</code></td><td>Tamaño forzado o proporción; espacio vacío flexible.</td></tr>
+            <tr><td><code>R_WIDGET_SCROLL_BOX</code></td><td>Contenido desplazable, en un eje o en ambos.</td></tr>
+            <tr><td><code>R_WIDGET_SPLITTER</code></td><td>Paneles separados por divisores arrastrables.</td></tr>
+            <tr><td><code>R_WIDGET_WRAP_BOX</code></td><td>Flujo de izquierda a derecha con salto de línea.</td></tr>
+            <tr><td><code>R_WIDGET_CANVAS</code></td><td>Colocación libre con anclas.</td></tr>
+            <tr><td><code>R_WIDGET_SWITCHER</code> / <code>TAB_VIEW</code> / <code>EXPANDER</code></td><td>Un hijo visible, pestañas o cabecera plegable.</td></tr>
+            <tr><td><code>R_WIDGET_DOCK_AREA</code></td><td>Paneles con pestañas, acoplables y desprendibles.</td></tr>
+            <tr><td><code>R_WIDGET_HEADER_BAR</code></td><td>Barra de título personalizada con menús y botones propios.</td></tr>
+            <tr><td><code>R_WIDGET_BACKGROUND_BLUR</code></td><td>Un hijo sobre un panel desenfocado o un agujero al escritorio.</td></tr>
+            <tr><td><code>R_WIDGET_ISLAND</code></td><td>Píldora que se despliega; dos contenidos, plegado y abierto.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="controles">Controles</h2>
+      <p><code>raven_controls.h</code> es el header más grande después de herramientas: 142 funciones para etiquetas, botones, campos, listas, menús, editores y visores. Todos los controles son widgets normales y aceptan las propiedades comunes.</p>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Familia</th><th>Tipo / tag</th><th>Funciones clave</th></tr></thead>
+          <tbody>
+            <tr><td>Texto</td><td><code>R_WIDGET_LABEL</code> / <code>Label</code></td><td><code>Rlabel_create</code>, <code>Rlabel_set_text</code>, <code>Rlabel_set_text_size</code>, <code>Rlabel_set_wrap</code>, <code>Rlabel_set_markdown</code>, <code>Rlabel_set_link_callback</code>.</td></tr>
+            <tr><td>Botones</td><td><code>R_WIDGET_BUTTON</code> / <code>Button</code></td><td><code>Rbutton_create</code>, <code>Rbutton_set_text</code>, <code>Rbutton_set_style</code>, <code>Rbutton_set_clicked_callback</code>.</td></tr>
+            <tr><td>Selección</td><td><code>R_WIDGET_CHECKBOX</code> / <code>Checkbox</code></td><td>Check, radio y switch con <code>Rcheckbox_set_checked</code>, <code>Rcheckbox_is_checked</code>, <code>Rcheckbox_set_style</code>.</td></tr>
+            <tr><td>Valores</td><td><code>SLIDER</code>, <code>PROGRESSBAR</code>, <code>SPIN_BOX</code></td><td><code>Rslider_set_range</code>, <code>Rslider_set_value</code>, <code>Rprogress_bar_set_value</code>, <code>Rspin_box_set_value</code>.</td></tr>
+            <tr><td>Entrada</td><td><code>TEXT_INPUT</code> / <code>TextInput</code></td><td><code>Rtext_input_get_text</code>, <code>Rtext_input_set_text</code>, <code>Rtext_input_set_placeholder</code>, <code>Rtext_input_set_password</code>.</td></tr>
+            <tr><td>Listas</td><td><code>COMBO_BOX</code>, <code>LIST_VIEW</code>, <code>TREE_VIEW</code>, <code>TILE_VIEW</code></td><td><code>Rlist_view_add_item</code>, <code>Rlist_view_set_virtual_items</code>, <code>Rtree_view_add_item</code>, <code>Rtile_view_set_items</code>, <code>Rcombo_box_set_selected</code>.</td></tr>
+            <tr><td>Menús</td><td><code>MENU_BAR</code>, <code>MENU</code>, <code>MENU_ITEM</code></td><td><code>Rmenu_add_menu</code>, <code>Rmenu_add_item</code>, <code>Rmenu_item_set_clicked_callback</code>, <code>Rmenu_item_set_shortcut</code>.</td></tr>
+            <tr><td>Imagen</td><td><code>R_WIDGET_IMAGE</code> / <code>Image</code></td><td><code>Rtexture_create_from_file</code>, <code>Rimage_set_texture</code>, <code>Rimage_set_stretch</code>, <code>Rimage_set_tint_color</code>, <code>Rimage_set_region</code>.</td></tr>
+            <tr><td>Editor</td><td><code>TEXT_EDITOR</code> / <code>TextEditor</code></td><td><code>Rtext_editor_set_text</code>, <code>Rtext_editor_set_language</code>, <code>Rtext_editor_add_marker</code>, <code>Rtext_editor_set_completion_callback</code>.</td></tr>
+            <tr><td>Archivos</td><td><code>FILE_BROWSER</code> / <code>FileBrowser</code></td><td><code>Rfile_browser_create</code>, <code>Rfile_browser_set_directory</code>, <code>Rfile_browser_set_filters</code>, <code>Rfile_browser_set_accepted_callback</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">static void on_greet(Rid button, void* user) {
+    Rid field = (Rid)(uintptr_t)user;
+    const char* name = Rtext_input_get_text(field);
+    Rlabel_set_text(titulo, name &amp;&amp; *name ? name : "mundo");
+}
+
+Rid field = Rwidget_create(R_WIDGET_TEXT_INPUT);
+Rtext_input_set_placeholder(field, "Tu nombre");
+Rbutton_set_clicked_callback(boton, on_greet, (void*)(uintptr_t)field);</code></pre>
+      </div>
+      <p>Las listas enormes no necesitan crear un widget por fila: <code>Rlist_view_set_virtual_items(list, count, callback, user)</code> pide el texto de cada fila visible cuando hace falta. Es el mismo patrón que usan el editor, el grafo y la línea de tiempo para escalar.</p>
+
+      <h2 id="temas">Temas, fuentes y recursos</h2>
+      <p><code>raven_style.h</code> define los roles de color, las métricas, los materiales y la API de temas. <code>raven_resources.h</code> gestiona fuentes, texturas, imágenes y memoria de píxeles.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rtheme_apply(R_THEME_GLASS_DARK);
+Rtheme_set_accent(0.13f, 0.83f, 0.93f);
+Rtheme_set_style_metric("Button", NULL, R_METRIC_CORNER_RADIUS, 16);
+Rtheme_use(Rtheme_load("themes/ocean.xml"));
+
+Rid font = Rfont_create_from_file("fonts/Inter.ttf");
+Rtheme_set_font(font);
+
+Rid icon = Rtexture_create_from_file("icons/save.png");
+Rimage_set_texture(icono, icon);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Área</th><th>Funciones</th></tr></thead>
+          <tbody>
+            <tr><td>Temas</td><td><code>Rtheme_apply</code>, <code>Rtheme_set_color</code>, <code>Rtheme_get_color</code>, <code>Rtheme_set_metric</code>, <code>Rtheme_set_material</code>, <code>Rtheme_set_font</code>, <code>Rtheme_set_accent</code>, <code>Rtheme_set_dark</code>, <code>Rtheme_set_wallpaper</code>.</td></tr>
+            <tr><td>Estilos</td><td><code>Rtheme_set_style_color</code>, <code>Rtheme_set_style_metric</code>, <code>Rtheme_set_style_material</code>, <code>Rtheme_clear_styles</code>.</td></tr>
+            <tr><td>Archivos de tema</td><td><code>Rtheme_load</code>, <code>Rtheme_use</code>, <code>Rtheme_save</code>, <code>Rtheme_get_count</code>, <code>Rtheme_get_name_at</code>.</td></tr>
+            <tr><td>Fuentes</td><td><code>Rfont_create</code>, <code>Rfont_create_from_file</code>, <code>Rfont_get_default</code>, <code>Rfont_get_monospace</code>, <code>Rfont_set_fallback</code>, <code>Rfont_set_variant</code>, <code>Rfont_measure_text</code>.</td></tr>
+            <tr><td>Texturas</td><td><code>Rtexture_create</code>, <code>Rtexture_create_from_pixels</code>, <code>Rtexture_create_async</code>, <code>Rtexture_update</code>, <code>Rtexture_destroy</code>.</td></tr>
+            <tr><td>Imágenes</td><td><code>Rimage_decode</code>, <code>Rpixels_free</code>, <code>Rtexture_create_from_file</code>; formatos PNG, JPEG, BMP, TGA, GIF y PSD.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="xml">XML y documentos</h2>
+      <p><code>raven_xml.h</code> es a la vez el cargador de interfaces y una API de documentos: se puede leer, recorrer, modificar, serializar y volver a construir un árbol XML sin tocar un archivo. La <a href="xml.html">referencia XML</a> explica los tags y atributos.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid window = Rwindow_create_from_xml_file("editor.xml");
+Rid panel  = Rwidget_create_from_xml(xml, strlen(xml));
+
+RXmlError error;
+Rid doc = Rxml_document_parse("&lt;VBox&gt;&lt;Label Text='x'/&gt;&lt;/VBox&gt;", 40, &amp;error);
+if (!doc) {
+    fprintf(stderr, "línea %d: %s\n", error.line, error.message);
+}
+
+Rid root  = Rxml_document_get_root(doc);
+Rid label = Rxml_node_add_child(root, "Label", -1);
+Rxml_node_set_attribute(label, "Text", "desde C");
+Rid built = Rxml_document_create_widget(doc);
+Rxml_document_destroy(doc);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Grupo</th><th>Funciones</th></tr></thead>
+          <tbody>
+            <tr><td>Construir</td><td><code>Rwindow_create_from_xml[_file]</code>, <code>Rwidget_create_from_xml[_file]</code>, <code>Rwindow_create_from_compiled</code>, <code>Rwidget_create_from_compiled</code>.</td></tr>
+            <tr><td>Documentos</td><td><code>Rxml_document_create</code>, <code>_parse</code>, <code>_load</code>, <code>_destroy</code>, <code>_is_valid</code>, <code>_get_root</code>, <code>_to_string</code>, <code>_save</code>, <code>_create_widget</code>, <code>_create_window</code>.</td></tr>
+            <tr><td>Nodos</td><td><code>Rxml_node_get_tag</code>, <code>_get_text</code>, <code>_get_parent</code>, <code>_get_child_count</code>, <code>_get_child</code>, <code>_add_child</code>, <code>_add_xml</code>, <code>_remove</code>, <code>_duplicate</code>, <code>_move</code>, <code>_to_string</code>.</td></tr>
+            <tr><td>Atributos</td><td><code>Rxml_node_get_attribute</code>, <code>_get_attribute_count</code>, <code>_get_attribute_name</code>, <code>_get_attribute_value</code>, <code>_set_attribute</code>, <code>Rwidget_set_attribute</code>.</td></tr>
+            <tr><td>Tags propios</td><td><code>Rxml_register_widgets[_from_file]</code>, <code>Rxml_register_tag</code>, <code>Rxml_unregister_tag</code>, <code>Rxml_is_tag_registered</code>, <code>Rxml_get_tag_count</code>.</td></tr>
+            <tr><td>Recarga</td><td><code>Rxml_set_live_reload</code>, <code>Rxml_get_live_reload</code>, <code>Rxml_set_reload_callback</code>, <code>Rxml_check_files</code>, <code>Rxml_set_base_path</code>, <code>Rxml_resolve_path</code>.</td></tr>
+            <tr><td>Introspección</td><td><code>Rxml_get_tag_name</code>, <code>Rxml_get_tag_description</code>, <code>Rxml_get_tag_children</code>, <code>Rxml_get_attribute_count</code>, <code>Rxml_get_attribute_info</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="callout tip">
+        <div class="ci">&#128161;</div>
+        <p>Para herramientas visuales, <code>Rwidget_get_xml_node</code> y <code>Rxml_node_get_widget</code> mantienen el vínculo entre un widget y el nodo que lo creó. Así un editor puede seleccionar en el árbol, pintar en la vista previa y editar atributos sin duplicar el modelo.</p>
+      </div>
+
+      <h2 id="herramientas">Herramientas, diálogos y dibujo</h2>
+      <p>El resto de la API cubre las piezas que convierten a Raven en una base para editores: herramientas creativas, diálogos del sistema, viewports, dibujo inmediato, shaders, Vulkan y backends.</p>
+
+      <h3>Herramientas creativas</h3>
+      <p>En <code>raven_tools.h</code>: el selector de color, la línea de tiempo, el grafo de nodos y el editor de bloques. Tienen 173 funciones entre modelos, callbacks, vistas y utilidades de color.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">Rid picker = Rcolor_picker_create();
+Rcolor_picker_set_changed_callback(picker, on_color, app);
+
+Rid timeline = Rtimeline_create();
+int track = Rtimeline_add_track(timeline, "Cámara");
+Rtimeline_add_clip(timeline, track, 0.0, 3.5, "Plano general");
+
+Rid graph = Rnode_graph_create();
+int a = Rnode_graph_add_node(graph, "Ruido", 40, 60);
+int b = Rnode_graph_add_node(graph, "Mezcla", 320, 90);
+Rnode_graph_connect(graph, Rnode_graph_add_output(graph, a, "Value", "number"),
+                           Rnode_graph_add_input(graph, b, "A", "number"));</code></pre>
+      </div>
+
+      <h3>Diálogos y archivos</h3>
+      <p><code>raven_dialogs.h</code> usa los diálogos del sistema cuando existen (Windows: diálogos comunes; Linux: <code>zenity</code> o <code>kdialog</code>) y, si no, un diálogo de Raven construido sobre <code>FileBrowser</code>.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">RFileDialogDesc desc = {0};
+desc.parent = window;
+desc.title  = "Abrir";
+desc.filters = filtros;
+desc.filter_count = 2;
+const char* path = Rfile_dialog_open(&amp;desc);   /* NULL si se cancela */
+
+if (Rmessage_box(window, "Salir", "¿Descartar los cambios?",
+                 R_MESSAGE_OK_CANCEL) == R_MESSAGE_RESULT_OK) {
+    Rquit(0);
+}</code></pre>
+      </div>
+
+      <h3>Viewports y dibujo</h3>
+      <p><code>raven_viewport.h</code> muestra una textura, dibuja dentro del render pass de Raven o crea una ventana hija nativa. <code>raven_draw.h</code> es la API de dibujo inmediato para widgets personalizados.</p>
+      <div class="code" data-lang="c">
+<pre><code class="language-c">/* 1. textura: cualquier imagen, como un widget */
+Rviewport_set_texture(viewport, texture);
+
+/* 2. callback de dibujo: tus llamadas Vulkan en el render pass de la ventana */
+Rviewport_set_draw_callback(viewport, on_draw, app);
+
+/* 3. ventana hija nativa: OpenGL, Direct3D, lo que sea */
+Rviewport_set_native(viewport, R_TRUE);
+Rviewport_get_native_handle(viewport, &amp;native);</code></pre>
+      </div>
+      <div class="table-wrap compact">
+        <table>
+          <thead><tr><th>Header</th><th>Qué contiene</th></tr></thead>
+          <tbody>
+            <tr><td><code>raven_draw.h</code></td><td><code>Rdraw_rect</code>, <code>Rdraw_line</code>, <code>Rdraw_curve</code>, <code>Rdraw_image</code>, <code>Rdraw_text</code>, <code>Rdraw_glass</code>, <code>Rdraw_spring</code>, clips y primitivas.</td></tr>
+            <tr><td><code>raven_shader.h</code></td><td>Shaders SPIR-V, los ocho efectos incorporados, <code>RShaderLook</code> y <code>Rdraw_shader</code>.</td></tr>
+            <tr><td><code>raven_vulkan.h</code></td><td>Compartir el dispositivo Vulkan, texturas desde image views, texturas compartidas con OpenGL y simulación de pérdida de dispositivo.</td></tr>
+            <tr><td><code>raven_backend.h</code></td><td><code>RBackendVTable</code> y <code>Rbackend_register</code>: un renderer propio o el backend nulo para tests.</td></tr>
+            <tr><td><code>raven_host.h</code></td><td>Integrar Raven en un host que ya tiene ventanas: registrar la plataforma e inyectar eventos.</td></tr>
+            <tr><td><code>raven_accessibility.h</code></td><td>Escala de texto, alto contraste, filtros de color, reducción de movimiento, anuncios y atributos accesibles.</td></tr>
+            <tr><td><code>raven_locale.h</code></td><td>Tablas CSV, <code>Rtr</code>, plurales CLDR, formato de números y detección de RTL.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <h2 id="indice">Índice completo</h2>
+      <p>Las <strong>921 funciones públicas</strong> de los headers, agrupadas por área. Escribe para filtrar por nombre, tipo, argumentos o descripción. Los textos de las descripciones vienen de los comentarios de los headers.</p>
+      <div class="api-toolbar">
+        <input class="input" id="api-search" type="search" placeholder="Filtrar: Rwindow_, text editor, callback, Vulkan..." autocomplete="off" spellcheck="false" aria-label="Filtrar las funciones de la API">
+        <span class="count" id="api-count">921 funciones</span>
+      </div>
+      <div id="api-index-list">
+        <div class="api-empty">Cargando el índice de la API...</div>
+      </div>
+
+      <div class="callout warn">
+        <div class="ci">&#9888;</div>
+        <p>Raven está en desarrollo activo y su API pública puede cambiar antes de la versión 1.0. Este índice se generó a partir de los headers del paquete <strong>0.1.3</strong>. Si actualizas la librería, vuelve a generar <code>assets/js/api-index.js</code> desde los nuevos headers.</p>
+      </div>
+
+      <div class="pager">
+        <a href="interfaz.html"><span>Anterior</span>&larr; Interfaz</a>
+        <a class="next" href="lenguajes.html"><span>Siguiente</span>Otros lenguajes &rarr;</a>
+      </div>
+
+      <div class="footer">
+        <span>Raven Docs &middot; documentación comunitaria de Raven 0.1.3</span>
+        <span>Hecho con HTML, CSS y JavaScript sin dependencias. <a href="https://github.com/oscar-soirey/Raven" target="_blank" rel="noopener">Raven en GitHub</a></span>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/search-index.js"></script>
+<script src="assets/js/api-index.js"></script>
+<script src="assets/js/site.js"></script>
+</body>
+</html>
